@@ -1,9 +1,15 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
+import { useCart } from "../../context/CartContext";
+import { useToast } from "../../context/ToastContext";
 import { formatPrice } from "../../lib/data/products";
 
 export default function ProductCard({ product }) {
+  const { addItem } = useCart();
+  const { showToast } = useToast();
+
   const hasDiscount =
     product.originalPrice && product.originalPrice > product.price;
   const discountPercent = hasDiscount
@@ -12,10 +18,26 @@ export default function ProductCard({ product }) {
       )
     : null;
   const hoverImage = product.hoverImage || product.image;
+  const productHref = `/products/${product.id}`;
+
+  function handleAddToCart(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const result = addItem(product, 1);
+    if (result.ok) {
+      showToast(`${product.name} added to cart`);
+    } else {
+      showToast(result.message, "error");
+    }
+  }
 
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-white/[0.08] bg-white/[0.03] shadow-[0_20px_50px_rgba(0,0,0,0.35)] transition-all duration-500 hover:border-violet-500/25 hover:shadow-[0_24px_60px_rgba(139,92,246,0.15)]">
-      <div className="relative aspect-[4/5] overflow-hidden bg-zinc-900">
+      <Link
+        href={productHref}
+        className="relative block aspect-[4/5] overflow-hidden bg-zinc-900"
+      >
         <Image
           src={product.image}
           alt={product.name}
@@ -47,10 +69,9 @@ export default function ProductCard({ product }) {
           </span>
         ) : null}
 
-        <button
-          type="button"
-          aria-label={`Quick view ${product.name}`}
-          className="absolute bottom-4 right-4 z-10 flex h-10 w-10 translate-y-2 items-center justify-center rounded-full border border-white/15 bg-black/45 text-white opacity-0 backdrop-blur-md transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 hover:border-violet-400/40 hover:bg-violet-500/20"
+        <span
+          className="absolute bottom-4 right-4 z-10 flex h-10 w-10 translate-y-2 items-center justify-center rounded-full border border-white/15 bg-black/45 text-white opacity-0 backdrop-blur-md transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100"
+          aria-hidden="true"
         >
           <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
             <path
@@ -60,13 +81,15 @@ export default function ProductCard({ product }) {
             />
             <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.6" />
           </svg>
-        </button>
-      </div>
+        </span>
+      </Link>
 
       <div className="flex flex-1 flex-col p-5">
-        <h3 className="line-clamp-2 min-h-[3rem] text-base font-semibold leading-snug text-white transition-colors duration-300 group-hover:text-violet-200">
-          {product.name}
-        </h3>
+        <Link href={productHref}>
+          <h3 className="line-clamp-2 min-h-[3rem] text-base font-semibold leading-snug text-white transition-colors duration-300 group-hover:text-violet-200">
+            {product.name}
+          </h3>
+        </Link>
 
         <div className="mt-3 flex flex-wrap items-end gap-2">
           <span className="text-xl font-bold text-white">
@@ -81,6 +104,7 @@ export default function ProductCard({ product }) {
 
         <button
           type="button"
+          onClick={handleAddToCart}
           className="group/btn relative mt-5 w-full cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-white transition-all duration-300 hover:border-violet-500/35 hover:shadow-[0_0_24px_rgba(139,92,246,0.2)]"
         >
           <span

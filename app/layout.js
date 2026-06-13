@@ -3,6 +3,7 @@ import FaqSection from "../components/sections/FaqSection";
 import Footer from "../components/layout/Footer";
 import Header from "../components/layout/Header";
 import MainContent from "../components/layout/MainContent";
+import AppProviders from "../components/providers/AppProviders";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -32,12 +33,14 @@ export default function RootLayout({ children }) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col overflow-x-hidden bg-background text-foreground">
-        <Header isLoggedIn={false} />
-        <MainContent>
-          {children}
-          <FaqSection />
-        </MainContent>
-        <Footer />
+        <AppProviders>
+          <Header isLoggedIn={false} />
+          <MainContent>
+            {children}
+            <FaqSection />
+          </MainContent>
+          <Footer />
+        </AppProviders>
       </body>
     </html>
   );
