@@ -1,19 +1,116 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fafafa;
-  --foreground: #171717;
+  --background: #050505;
+  --foreground: #fafafa;
+  --muted: #a1a1aa;
+  --muted-foreground: #71717a;
+  --surface: #0f0f12;
+  --surface-elevated: #16161a;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.14);
+  --accent: #a78bfa;
+  --accent-strong: #8b5cf6;
+  --accent-glow: rgba(139, 92, 246, 0.35);
+  --ring: rgba(167, 139, 250, 0.45);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
+* {
+  border-color: var(--border);
+}
+
+html {
+  color-scheme: dark;
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
 body {
+  overflow-x: hidden;
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  background-image:
+    radial-gradient(
+      ellipse 80% 50% at 50% -20%,
+      rgba(139, 92, 246, 0.15),
+      transparent
+    ),
+    radial-gradient(
+      ellipse 60% 40% at 100% 0%,
+      rgba(6, 182, 212, 0.08),
+      transparent
+    );
+  background-attachment: fixed;
+}
+
+::selection {
+  background: rgba(139, 92, 246, 0.35);
+  color: #fff;
+}
+
+@keyframes footer-glow {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translate3d(12px, -10px, 0) scale(1.08);
+    opacity: 0.85;
+  }
+}
+
+@keyframes footer-glow-reverse {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.45;
+  }
+  50% {
+    transform: translate3d(-10px, 8px, 0) scale(1.06);
+    opacity: 0.75;
+  }
+}
+
+.animate-footer-glow {
+  animation: footer-glow 8s ease-in-out infinite;
+}
+
+.animate-footer-glow-reverse {
+  animation: footer-glow-reverse 10s ease-in-out infinite;
+}
+
+.product-swiper,
+.category-swiper,
+.hero-product-swiper {
+  overflow: hidden;
+  width: 100%;
+}
+
+.product-swiper .swiper-wrapper,
+.category-swiper .swiper-wrapper {
+  align-items: stretch;
+}
+
+.product-swiper .swiper-slide,
+.category-swiper .swiper-slide,
+.hero-product-swiper .swiper-slide {
+  height: auto;
+  box-sizing: border-box;
 }
