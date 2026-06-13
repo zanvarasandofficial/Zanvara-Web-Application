@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" fill="none">
+  <defs>
+    <linearGradient id="zanvara-mark" x1="45" y1="45" x2="135" y2="135" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#C4B5FD" />
+      <stop offset="0.5" stop-color="#E879F9" />
+      <stop offset="1" stop-color="#67E8F9" />
+    </linearGradient>
+    <radialGradient id="zanvara-glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(54 36) rotate(45) scale(124)">
+      <stop stop-color="#A78BFA" stop-opacity="0.38" />
+      <stop offset="1" stop-color="#09090B" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <rect width="180" height="180" rx="40" fill="#09090B" />
+  <rect width="180" height="180" rx="40" fill="url(#zanvara-glow)" />
+  <rect x="4" y="4" width="172" height="172" rx="36" stroke="#FFFFFF" stroke-opacity="0.1" stroke-width="3" />
+  <path d="M45 45H135L78.75 135H123.75" stroke="url(#zanvara-mark)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M45 135L101.25 45" stroke="url(#zanvara-mark)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" opacity="0.55" />
+</svg>

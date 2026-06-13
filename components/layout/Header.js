@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Logo from "../brand/Logo";
 import CartIcon from "../icons/CartIcon";
@@ -15,11 +16,29 @@ const navLinks = [
 
 export default function Header({ isLoggedIn = false }) {
   const pathname = usePathname();
+  const isHome = pathname === "/";
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    function handleScroll() {
+      setScrolled(window.scrollY > 48);
+    }
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [pathname]);
+
+  const isTransparent = isHome && !scrolled;
 
   return (
-    <header className="sticky top-0 z-50 w-full">
-      <div className="absolute inset-0 border-b border-white/[0.06] bg-[#050505]/75 backdrop-blur-xl backdrop-saturate-150" />
-      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-violet-500/30 to-transparent" />
+    <header className="fixed inset-x-0 top-0 z-[100] w-full">
+      {!isTransparent ? (
+        <>
+          <div className="absolute inset-0 border-b border-white/[0.06] bg-[#050505]/70 backdrop-blur-xl backdrop-saturate-150 transition-all duration-300" />
+          <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-violet-500/30 to-transparent" />
+        </>
+      ) : null}
 
       <div className="relative mx-auto flex h-[4.5rem] w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <Logo />
@@ -28,7 +47,7 @@ export default function Header({ isLoggedIn = false }) {
           className="absolute left-1/2 hidden -translate-x-1/2 md:flex"
           aria-label="Main navigation"
         >
-          <ul className="flex items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.03] p-1 shadow-[0_8px_32px_rgba(0,0,0,0.35)]">
+          <ul className="flex items-center gap-2">
             {navLinks.map((link) => {
               const isActive =
                 link.href === "/"
@@ -42,8 +61,8 @@ export default function Header({ isLoggedIn = false }) {
                     className={[
                       "relative rounded-full px-4 py-2 text-sm font-medium transition-all duration-300",
                       isActive
-                        ? "bg-white/[0.08] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
-                        : "text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-100",
+                        ? "border border-white/[0.08] bg-white/[0.08] text-white shadow-[0_8px_32px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-md"
+                        : "border border-transparent bg-transparent text-zinc-400 hover:text-white",
                     ].join(" ")}
                   >
                     {link.label}
@@ -64,7 +83,7 @@ export default function Header({ isLoggedIn = false }) {
           {isLoggedIn ? (
             <button
               type="button"
-              className="group relative flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-gradient-to-br from-zinc-900 to-zinc-950 text-zinc-200 transition-all duration-300 hover:border-violet-500/40 hover:text-white hover:shadow-[0_0_24px_rgba(139,92,246,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+              className="group relative flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-black/30 text-zinc-200 backdrop-blur-md transition-all duration-300 hover:border-violet-500/40 hover:text-white hover:shadow-[0_0_24px_rgba(139,92,246,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
               aria-label="Open profile"
             >
               <span
@@ -76,7 +95,7 @@ export default function Header({ isLoggedIn = false }) {
           ) : (
             <button
               type="button"
-              className="group relative flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-zinc-200 transition-all duration-300 hover:border-violet-500/40 hover:bg-white/[0.07] hover:text-white hover:shadow-[0_0_24px_rgba(139,92,246,0.2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+              className="group relative flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-black/30 text-zinc-200 backdrop-blur-md transition-all duration-300 hover:border-violet-500/40 hover:bg-white/[0.07] hover:text-white hover:shadow-[0_0_24px_rgba(139,92,246,0.2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
               aria-label="Open cart"
             >
               <CartIcon className="h-5 w-5 transition-transform duration-300 group-hover:scale-110" />
@@ -90,3 +109,4 @@ export default function Header({ isLoggedIn = false }) {
     </header>
   );
 }
+

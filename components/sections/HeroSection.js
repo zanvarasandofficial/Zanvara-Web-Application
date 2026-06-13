@@ -8,6 +8,7 @@ import { A11y, Autoplay, EffectFade, Navigation } from "swiper/modules";
 import { formatPrice, heroProducts } from "../../lib/data/products";
 import { SliderNavButton } from "../ui/SliderNav";
 import Reveal from "../ui/Reveal";
+import HeroVideoBackground from "./HeroVideoBackground";
 
 import "swiper/css";
 import "swiper/css/effect-fade";
@@ -18,18 +19,11 @@ export default function HeroSection() {
 
   return (
     <section className="relative overflow-hidden">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.18),transparent_65%)]"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -right-20 top-24 h-72 w-72 rounded-full bg-fuchsia-500/10 blur-3xl animate-footer-glow"
-      />
+      <HeroVideoBackground />
 
-      <div className="mx-auto max-w-7xl px-4 pb-10 pt-10 sm:px-6 sm:pb-14 sm:pt-14 lg:px-8 lg:pb-16 lg:pt-16">
-        <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
-          <Reveal className="max-w-xl">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 pb-10 pt-[calc(4.5rem+2.5rem)] sm:px-6 sm:pb-14 sm:pt-[calc(4.5rem+3.5rem)] lg:px-8 lg:pb-16 lg:pt-[calc(4.5rem+4rem)]">
+        <div className="grid items-center gap-10 lg:grid-cols-1 lg:gap-14">
+          <Reveal className="max-w-2xl">
             <p className="mb-4 inline-flex items-center rounded-full border border-violet-500/20 bg-violet-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-violet-300">
               Premium Collection 2026
             </p>
@@ -78,7 +72,7 @@ export default function HeroSection() {
           <Reveal delay={160} className="relative">
             <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-violet-500/20 via-fuchsia-500/10 to-cyan-500/10 blur-2xl" />
 
-            <div className="relative overflow-hidden rounded-[2rem] border border-white/[0.08] bg-white/[0.03] p-4 shadow-[0_30px_80px_rgba(0,0,0,0.45)] sm:p-5">
+            {/* <div className="relative overflow-hidden rounded-[2rem] border border-white/[0.08] bg-white/[0.03] p-4 shadow-[0_30px_80px_rgba(0,0,0,0.45)] sm:p-5">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-zinc-500">
@@ -172,7 +166,7 @@ export default function HeroSection() {
                   );
                 })}
               </Swiper>
-            </div>
+            </div> */}
           </Reveal>
         </div>
       </div>

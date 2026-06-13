@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import FaqSection from "../components/sections/FaqSection";
 import Footer from "../components/layout/Footer";
 import Header from "../components/layout/Header";
+import MainContent from "../components/layout/MainContent";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -17,6 +18,11 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "Zanvara | Modern Commerce",
   description: "Zanvara — a modern dark-themed e-commerce experience.",
+  applicationName: "Zanvara",
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/apple-icon.svg", type: "image/svg+xml" }],
+  },
 };
 
 export default function RootLayout({ children }) {
@@ -27,10 +33,10 @@ export default function RootLayout({ children }) {
     >
       <body className="flex min-h-full flex-col overflow-x-hidden bg-background text-foreground">
         <Header isLoggedIn={false} />
-        <main className="flex-1 overflow-x-hidden">
+        <MainContent>
           {children}
           <FaqSection />
-        </main>
+        </MainContent>
         <Footer />
       </body>
     </html>

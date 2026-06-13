@@ -129,3 +129,15 @@ body {
 .filter-modal-panel {
   animation: filter-modal-in 0.22s ease-out;
 }
+
+.footer-ambient-bg {
+  isolation: isolate;
+}
+
+.footer-ambient-vignette {
+  background: radial-gradient(
+    ellipse at center,
+    transparent 35%,
+    rgba(5, 5, 5, 0.35) 100%
+  );
+}

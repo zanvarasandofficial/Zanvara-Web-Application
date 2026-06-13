@@ -3,6 +3,8 @@
 import Link from "next/link";
 import Logo from "../brand/Logo";
 import Reveal from "../ui/Reveal";
+import ContactLinks from "../ui/ContactLinks";
+import FooterVideoBackground from "./FooterVideoBackground";
 import SocialLinks from "./SocialLinks";
 
 const footerLinks = {
@@ -61,20 +63,14 @@ export default function Footer() {
 
   return (
     <footer className="relative mt-auto overflow-hidden">
+      <FooterVideoBackground />
+
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-500/35 to-transparent"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -left-24 top-8 h-56 w-56 rounded-full bg-violet-600/10 blur-3xl animate-footer-glow"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -right-24 bottom-12 h-64 w-64 rounded-full bg-cyan-500/10 blur-3xl animate-footer-glow-reverse"
+        className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-px bg-gradient-to-r from-transparent via-violet-400/50 to-transparent"
       />
 
-      <div className="relative border-t border-white/[0.06] bg-[#050505]/90 backdrop-blur-xl">
+      <div className="relative z-10 border-t border-white/[0.08] bg-[#050505]/55 backdrop-blur-[6px]">
         <div className="mx-auto max-w-7xl px-4 pt-16 sm:px-6 lg:px-8 lg:pt-20 pb-6 lg:pb-8">
           <div className="grid gap-12 lg:grid-cols-12 lg:gap-10">
             <Reveal className="lg:col-span-4" delay={0}>
@@ -83,6 +79,7 @@ export default function Footer() {
                 Curated products. Premium experience. Zanvara brings modern
                 commerce to your screen with style, speed, and trust.
               </p>
+              <ContactLinks className="mt-6" />
               <div className="mt-6">
                 <SocialLinks />
               </div>
