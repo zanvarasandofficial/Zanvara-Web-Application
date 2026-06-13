@@ -14,7 +14,7 @@ export const SliderNavButton = forwardRef(function SliderNavButton(
       type="button"
       aria-label={isPrev ? "Previous slide" : "Next slide"}
       className={[
-        "group relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/[0.04] text-zinc-300 transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-500/40 hover:text-white hover:shadow-[0_0_28px_rgba(139,92,246,0.28)] disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0 disabled:hover:shadow-none",
+        "group relative flex h-12 w-12 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/[0.04] text-zinc-300 transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-500/40 hover:text-white hover:shadow-[0_0_28px_rgba(139,92,246,0.28)] disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0 disabled:hover:shadow-none",
         className,
       ].join(" ")}
       {...props}

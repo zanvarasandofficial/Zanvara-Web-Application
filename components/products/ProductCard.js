@@ -81,7 +81,7 @@ export default function ProductCard({ product }) {
 
         <button
           type="button"
-          className="group/btn relative mt-5 w-full overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-white transition-all duration-300 hover:border-violet-500/35 hover:shadow-[0_0_24px_rgba(139,92,246,0.2)]"
+          className="group/btn relative mt-5 w-full cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-white transition-all duration-300 hover:border-violet-500/35 hover:shadow-[0_0_24px_rgba(139,92,246,0.2)]"
         >
           <span
             aria-hidden="true"

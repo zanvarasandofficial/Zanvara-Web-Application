@@ -1,4 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google";
+import FaqSection from "../components/sections/FaqSection";
 import Footer from "../components/layout/Footer";
 import Header from "../components/layout/Header";
 import "./globals.css";
@@ -26,7 +27,10 @@ export default function RootLayout({ children }) {
     >
       <body className="flex min-h-full flex-col overflow-x-hidden bg-background text-foreground">
         <Header isLoggedIn={false} />
-        <main className="flex-1 overflow-x-hidden">{children}</main>
+        <main className="flex-1 overflow-x-hidden">
+          {children}
+          <FaqSection />
+        </main>
         <Footer />
       </body>
     </html>

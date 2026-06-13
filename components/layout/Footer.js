@@ -75,7 +75,7 @@ export default function Footer() {
       />
 
       <div className="relative border-t border-white/[0.06] bg-[#050505]/90 backdrop-blur-xl">
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+        <div className="mx-auto max-w-7xl px-4 pt-16 sm:px-6 lg:px-8 lg:pt-20 pb-6 lg:pb-8">
           <div className="grid gap-12 lg:grid-cols-12 lg:gap-10">
             <Reveal className="lg:col-span-4" delay={0}>
               <Logo />

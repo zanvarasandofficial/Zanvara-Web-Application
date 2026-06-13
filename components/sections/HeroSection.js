@@ -162,7 +162,7 @@ export default function HeroSection() {
                           </div>
                           <button
                             type="button"
-                            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white/[0.06] px-4 py-3 text-sm font-semibold text-white transition-all duration-300 hover:bg-gradient-to-r hover:from-violet-600 hover:via-fuchsia-600 hover:to-violet-600 hover:shadow-[0_0_28px_rgba(139,92,246,0.28)] sm:w-auto sm:px-6"
+                            className="mt-6 inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-white/[0.06] px-4 py-3 text-sm font-semibold text-white transition-all duration-300 hover:bg-gradient-to-r hover:from-violet-600 hover:via-fuchsia-600 hover:to-violet-600 hover:shadow-[0_0_28px_rgba(139,92,246,0.28)] sm:w-auto sm:px-6"
                           >
                             Add to Cart
                           </button>
