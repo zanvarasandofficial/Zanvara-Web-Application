@@ -1,0 +1,126 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { A11y, Navigation } from "swiper/modules";
+import {
+  getPublishedReviews,
+  REVIEWS_CHANGED_EVENT,
+} from "../../lib/reviews/review-storage";
+import SectionHeading from "../ui/SectionHeading";
+import StarRating from "../ui/StarRating";
+import { SliderNav } from "../ui/SliderNav";
+import Reveal from "../ui/Reveal";
+
+import "swiper/css";
+
+function bindSliderNavigation(swiper, prevRef, nextRef) {
+  swiper.params.navigation.prevEl = prevRef.current;
+  swiper.params.navigation.nextEl = nextRef.current;
+
+  window.setTimeout(() => {
+    swiper.params.navigation.prevEl = prevRef.current;
+    swiper.params.navigation.nextEl = nextRef.current;
+    swiper.navigation.destroy();
+    swiper.navigation.init();
+    swiper.navigation.update();
+  });
+}
+
+export default function ReviewsSection() {
+  const prevRef = useRef(null);
+  const nextRef = useRef(null);
+  const [reviews, setReviews] = useState([]);
+
+  useEffect(() => {
+    function loadReviews() {
+      setReviews(getPublishedReviews());
+    }
+
+    loadReviews();
+    window.addEventListener(REVIEWS_CHANGED_EVENT, loadReviews);
+    return () => window.removeEventListener(REVIEWS_CHANGED_EVENT, loadReviews);
+  }, []);
+
+  if (reviews.length === 0) {
+    return null;
+  }
+
+  return (
+    <section className="relative overflow-hidden border-t border-white/[0.06] py-16 sm:py-20 lg:py-24">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-500/25 to-transparent"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-24 top-20 h-72 w-72 rounded-full bg-violet-500/10 blur-3xl"
+      />
+
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <Reveal>
+          <SectionHeading
+            eyebrow="Customer Reviews"
+            title="Trusted by thousands across Pakistan"
+            subtitle="Real feedback from verified Zanvara shoppers — quality, delivery, and support you can count on."
+            actions={<SliderNav prevRef={prevRef} nextRef={nextRef} />}
+          />
+        </Reveal>
+
+        <Reveal delay={120}>
+          <div className="overflow-hidden">
+            <Swiper
+              modules={[Navigation, A11y]}
+              spaceBetween={20}
+              slidesPerView={1}
+              speed={650}
+              grabCursor
+              watchOverflow
+              breakpoints={{
+                768: { slidesPerView: 2, spaceBetween: 24 },
+                1280: { slidesPerView: 3, spaceBetween: 24 },
+              }}
+              navigation={{
+                prevEl: prevRef.current,
+                nextEl: nextRef.current,
+              }}
+              onBeforeInit={(swiper) => {
+                swiper.params.navigation.prevEl = prevRef.current;
+                swiper.params.navigation.nextEl = nextRef.current;
+              }}
+              onSwiper={(swiper) => bindSliderNavigation(swiper, prevRef, nextRef)}
+              className="reviews-swiper py-2"
+            >
+              {reviews.map((review) => (
+                <SwiperSlide key={review.id} className="h-auto">
+                  <article className="flex h-full flex-col rounded-[1.75rem] border border-white/[0.08] bg-white/[0.03] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.25)]">
+                    <div className="flex items-start justify-between gap-3">
+                      <StarRating rating={review.rating} />
+                      {review.verified ? (
+                        <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-emerald-300">
+                          Verified
+                        </span>
+                      ) : null}
+                    </div>
+
+                    <h3 className="mt-4 text-lg font-semibold text-white">{review.title}</h3>
+                    <p className="mt-3 flex-1 text-sm leading-7 text-zinc-400">
+                      &ldquo;{review.comment}&rdquo;
+                    </p>
+
+                    <div className="mt-6 border-t border-white/[0.06] pt-4">
+                      <p className="font-medium text-white">{review.customerName}</p>
+                      <p className="mt-1 text-xs text-zinc-500">
+                        {review.customerCity} · {review.productName}
+                      </p>
+                    </div>
+                  </article>
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}

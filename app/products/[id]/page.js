@@ -1,14 +1,12 @@
 import { notFound } from "next/navigation";
 import ProductDetail from "../../../components/products/ProductDetail";
-import { allProducts, getProductById } from "../../../lib/data/products";
+import { fetchProductById } from "../../../lib/api/products";
 
-export function generateStaticParams() {
-  return allProducts.map((product) => ({ id: product.id }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }) {
   const { id } = await params;
-  const product = getProductById(id);
+  const product = await fetchProductById(id);
 
   if (!product) {
     return { title: "Product Not Found | Zanvara" };
@@ -16,13 +14,13 @@ export async function generateMetadata({ params }) {
 
   return {
     title: `${product.name} | Zanvara`,
-    description: product.description,
+    description: product.description ?? `Shop ${product.name} at Zanvara.`,
   };
 }
 
 export default async function ProductPage({ params }) {
   const { id } = await params;
-  const product = getProductById(id);
+  const product = await fetchProductById(id);
 
   if (!product) {
     notFound();

@@ -45,7 +45,8 @@ export default function OrderSuccessView() {
             </h1>
             <p className="mx-auto mt-4 max-w-xl text-base leading-8 text-zinc-300">
               Your cash on delivery order has been received. Our team will contact
-              you shortly to confirm delivery details.
+              you shortly to confirm delivery details. Product reviews unlock only
+              after your parcel is marked as delivered.
             </p>
 
             {order ? (
@@ -79,10 +80,10 @@ export default function OrderSuccessView() {
                 Continue Shopping
               </Link>
               <Link
-                href="/"
+                href="/account/orders"
                 className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] px-6 py-3.5 text-sm font-semibold text-white transition-all duration-300 hover:border-violet-500/35 hover:bg-white/[0.06]"
               >
-                Back to Home
+                Track My Orders
               </Link>
             </div>
           </div>

@@ -9,6 +9,7 @@ import {
   useState,
 } from "react";
 import { getProductById } from "../lib/data/products";
+import { calculateCartDeliveryTotal } from "../lib/products/delivery";
 import { readCartFromStorage, writeCartToStorage } from "../lib/cart/storage";
 
 const CartContext = createContext(null);
@@ -22,6 +23,8 @@ function normalizeItem(item) {
     image: item.image,
     stock: item.stock,
     quantity: item.quantity,
+    deliveryType: item.deliveryType ?? "FREE",
+    deliveryCharge: item.deliveryCharge ?? null,
   };
 }
 
@@ -49,6 +52,10 @@ export function CartProvider({ children }) {
     [items],
   );
 
+  const deliveryTotal = useMemo(() => calculateCartDeliveryTotal(items), [items]);
+
+  const total = useMemo(() => subtotal + deliveryTotal, [subtotal, deliveryTotal]);
+
   const addItem = useCallback((product, quantity = 1) => {
     const catalogProduct = getProductById(product.id) ?? product;
     const productStock = catalogProduct.stock ?? 0;
@@ -72,7 +79,13 @@ export function CartProvider({ children }) {
       if (existing) {
         return current.map((item) =>
           item.productId === catalogProduct.id
-            ? { ...item, quantity: nextQty, stock: productStock }
+            ? {
+                ...item,
+                quantity: nextQty,
+                stock: productStock,
+                deliveryType: catalogProduct.deliveryType ?? "FREE",
+                deliveryCharge: catalogProduct.deliveryCharge ?? null,
+              }
             : item,
         );
       }
@@ -87,6 +100,8 @@ export function CartProvider({ children }) {
           image: catalogProduct.image,
           stock: productStock,
           quantity: qty,
+          deliveryType: catalogProduct.deliveryType ?? "FREE",
+          deliveryCharge: catalogProduct.deliveryCharge ?? null,
         }),
       ];
     });
@@ -114,7 +129,13 @@ export function CartProvider({ children }) {
 
       return current.map((entry) =>
         entry.productId === productId
-          ? { ...entry, quantity: nextQty, stock: maxStock }
+          ? {
+              ...entry,
+              quantity: nextQty,
+              stock: maxStock,
+              deliveryType: product?.deliveryType ?? entry.deliveryType ?? "FREE",
+              deliveryCharge: product?.deliveryCharge ?? entry.deliveryCharge ?? null,
+            }
           : entry,
       );
     });
@@ -135,6 +156,8 @@ export function CartProvider({ children }) {
       items,
       itemCount,
       subtotal,
+      deliveryTotal,
+      total,
       isReady,
       addItem,
       updateQuantity,
@@ -145,6 +168,8 @@ export function CartProvider({ children }) {
       items,
       itemCount,
       subtotal,
+      deliveryTotal,
+      total,
       isReady,
       addItem,
       updateQuantity,

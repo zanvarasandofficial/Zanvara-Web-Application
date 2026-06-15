@@ -13,12 +13,14 @@ export default function ProductCard({ product }) {
   const hasDiscount =
     product.originalPrice && product.originalPrice > product.price;
   const discountPercent = hasDiscount
-    ? Math.round(
+    ? product.discountPercent ??
+      Math.round(
         ((product.originalPrice - product.price) / product.originalPrice) * 100,
       )
     : null;
   const hoverImage = product.hoverImage || product.image;
   const productHref = `/products/${product.id}`;
+  const badgeLabel = product.badge?.trim();
 
   function handleAddToCart(event) {
     event.preventDefault();
@@ -57,9 +59,9 @@ export default function ProductCard({ product }) {
           className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"
         />
 
-        {product.badge ? (
+        {badgeLabel ? (
           <span className="absolute left-4 top-4 z-10 rounded-full border border-white/10 bg-black/50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-violet-200 backdrop-blur-md">
-            {product.badge}
+            {badgeLabel}
           </span>
         ) : null}
 

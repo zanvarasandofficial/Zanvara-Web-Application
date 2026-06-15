@@ -1,17 +1,40 @@
 "use client";
 
 import { useState } from "react";
+import { useToast } from "../../context/ToastContext";
+import { submitContactMessage } from "../../lib/api/inbound";
 import Reveal from "../ui/Reveal";
 
 const inputClassName =
   "w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none transition-all duration-300 placeholder:text-zinc-600 focus:border-violet-500/40 focus:bg-black/60 focus:shadow-[0_0_0_4px_rgba(139,92,246,0.12)]";
 
 export default function ContactForm({ className = "" }) {
+  const { showToast } = useToast();
   const [submitted, setSubmitted] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
-    setSubmitted(true);
+    setSaving(true);
+
+    const formData = new FormData(event.currentTarget);
+
+    try {
+      await submitContactMessage({
+        firstName: formData.get("firstName"),
+        lastName: formData.get("lastName"),
+        email: formData.get("email"),
+        phone: formData.get("phone") || undefined,
+        message: formData.get("message"),
+      });
+
+      setSubmitted(true);
+      showToast("Message sent successfully.");
+    } catch (submitError) {
+      showToast(submitError.message ?? "Could not send message.", "error");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -22,7 +45,6 @@ export default function ContactForm({ className = "" }) {
         <p className="text-[15px] font-semibold uppercase tracking-[0.22em] text-violet-300">
           Send a message
         </p>
-        {/* <h2 className="mt-2 text-2xl font-semibold text-white">We&apos;d love to hear from you</h2> */}
         <p className="mx-auto mt-2 max-w-md text-sm leading-7 text-zinc-400">
           Our team will get back to you as soon as possible.
         </p>
@@ -104,9 +126,10 @@ export default function ContactForm({ className = "" }) {
 
             <button
               type="submit"
-              className="w-full cursor-pointer rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-violet-600 bg-[length:200%_100%] px-4 py-3.5 text-sm font-semibold text-white transition-all duration-500 hover:bg-right hover:shadow-[0_0_32px_rgba(139,92,246,0.35)]"
+              disabled={saving}
+              className="w-full cursor-pointer rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-violet-600 bg-[length:200%_100%] px-4 py-3.5 text-sm font-semibold text-white transition-all duration-500 hover:bg-right hover:shadow-[0_0_32px_rgba(139,92,246,0.35)] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Send Message
+              {saving ? "Sending..." : "Send Message"}
             </button>
           </form>
         )}

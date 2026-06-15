@@ -1,8 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google";
-import FaqSection from "../components/sections/FaqSection";
-import Footer from "../components/layout/Footer";
-import Header from "../components/layout/Header";
-import MainContent from "../components/layout/MainContent";
+import ConditionalStoreShell from "../components/layout/ConditionalStoreShell";
 import AppProviders from "../components/providers/AppProviders";
 import "./globals.css";
 
@@ -34,12 +31,7 @@ export default function RootLayout({ children }) {
     >
       <body className="flex min-h-full flex-col overflow-x-hidden bg-background text-foreground">
         <AppProviders>
-          <Header isLoggedIn={false} />
-          <MainContent>
-            {children}
-            <FaqSection />
-          </MainContent>
-          <Footer />
+          <ConditionalStoreShell>{children}</ConditionalStoreShell>
         </AppProviders>
       </body>
     </html>

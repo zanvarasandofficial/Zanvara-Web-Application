@@ -5,10 +5,11 @@ import Link from "next/link";
 import { useCart } from "../../context/CartContext";
 import { useToast } from "../../context/ToastContext";
 import { formatPrice } from "../../lib/data/products";
+import { formatDeliveryLabel } from "../../lib/products/delivery";
 import Reveal from "../ui/Reveal";
 
 export default function CartView() {
-  const { items, subtotal, updateQuantity, removeItem } = useCart();
+  const { items, subtotal, deliveryTotal, total, updateQuantity, removeItem } = useCart();
   const { showToast } = useToast();
 
   if (items.length === 0) {
@@ -50,7 +51,11 @@ export default function CartView() {
 
         <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
           <div className="space-y-4">
-            {items.map((item, index) => (
+            {items.map((item, index) => {
+              const itemDeliveryLabel = formatDeliveryLabel(item);
+              const itemDeliveryIsFree = itemDeliveryLabel === "Free";
+
+              return (
               <Reveal key={item.productId} delay={index * 40}>
                 <article className="grid gap-4 rounded-[1.75rem] border border-white/[0.08] bg-white/[0.03] p-4 shadow-[0_20px_50px_rgba(0,0,0,0.25)] sm:grid-cols-[120px_minmax(0,1fr)] sm:p-5">
                   <Link
@@ -77,6 +82,16 @@ export default function CartView() {
                         </Link>
                         <p className="mt-1 text-sm text-zinc-500">
                           {item.stock} available in stock
+                        </p>
+                        <p
+                          className={[
+                            "mt-2 inline-flex rounded-full px-2.5 py-1 text-xs font-medium",
+                            itemDeliveryIsFree
+                              ? "border border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
+                              : "border border-amber-500/20 bg-amber-500/10 text-amber-200",
+                          ].join(" ")}
+                        >
+                          Delivery: {itemDeliveryLabel}
                         </p>
                       </div>
                       <button
@@ -139,7 +154,8 @@ export default function CartView() {
                   </div>
                 </article>
               </Reveal>
-            ))}
+              );
+            })}
           </div>
 
           <Reveal delay={120}>
@@ -153,13 +169,15 @@ export default function CartView() {
                 </div>
                 <div className="flex items-center justify-between text-zinc-400">
                   <span>Delivery</span>
-                  <span className="text-emerald-300">Free</span>
+                  <span className={deliveryTotal > 0 ? "text-amber-200" : "text-emerald-300"}>
+                    {deliveryTotal > 0 ? formatPrice(deliveryTotal) : "Free"}
+                  </span>
                 </div>
                 <div className="border-t border-white/[0.06] pt-3">
                   <div className="flex items-center justify-between">
                     <span className="font-medium text-white">Total</span>
                     <span className="text-2xl font-bold text-white">
-                      {formatPrice(subtotal)}
+                      {formatPrice(total)}
                     </span>
                   </div>
                   <p className="mt-2 text-xs text-zinc-500">

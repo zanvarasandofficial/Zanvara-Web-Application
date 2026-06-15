@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useCart } from "../../context/CartContext";
+import { useCustomerAuth } from "../../context/CustomerAuthContext";
 import Logo from "../brand/Logo";
 import CartIcon from "../icons/CartIcon";
 import UserIcon from "../icons/UserIcon";
@@ -15,9 +16,10 @@ const navLinks = [
   { href: "/contact", label: "Contact" },
 ];
 
-export default function Header({ isLoggedIn = false }) {
+export default function Header() {
   const pathname = usePathname();
   const { itemCount } = useCart();
+  const { isAuthenticated } = useCustomerAuth();
   const isHome = pathname === "/";
   const [scrolled, setScrolled] = useState(false);
 
@@ -82,9 +84,22 @@ export default function Header({ isLoggedIn = false }) {
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          {isLoggedIn ? (
-            <button
-              type="button"
+          <Link
+            href="/cart"
+            className="group relative flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-black/30 text-zinc-200 backdrop-blur-md transition-all duration-300 hover:border-violet-500/40 hover:bg-white/[0.07] hover:text-white hover:shadow-[0_0_24px_rgba(139,92,246,0.2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+            aria-label="Open cart"
+          >
+            <CartIcon className="h-5 w-5 transition-transform duration-300 group-hover:scale-110" />
+            {itemCount > 0 ? (
+              <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 px-1 text-[10px] font-semibold text-white shadow-lg shadow-violet-500/30">
+                {itemCount > 99 ? "99+" : itemCount}
+              </span>
+            ) : null}
+          </Link>
+
+          {isAuthenticated ? (
+            <Link
+              href="/account/profile"
               className="group relative flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-black/30 text-zinc-200 backdrop-blur-md transition-all duration-300 hover:border-violet-500/40 hover:text-white hover:shadow-[0_0_24px_rgba(139,92,246,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
               aria-label="Open profile"
             >
@@ -93,24 +108,10 @@ export default function Header({ isLoggedIn = false }) {
                 className="absolute inset-0 rounded-full bg-gradient-to-br from-violet-500/20 to-cyan-500/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
               />
               <UserIcon className="relative h-5 w-5" />
-            </button>
-          ) : (
-            <Link
-              href="/cart"
-              className="group relative flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-black/30 text-zinc-200 backdrop-blur-md transition-all duration-300 hover:border-violet-500/40 hover:bg-white/[0.07] hover:text-white hover:shadow-[0_0_24px_rgba(139,92,246,0.2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
-              aria-label="Open cart"
-            >
-              <CartIcon className="h-5 w-5 transition-transform duration-300 group-hover:scale-110" />
-              {itemCount > 0 ? (
-                <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 px-1 text-[10px] font-semibold text-white shadow-lg shadow-violet-500/30">
-                  {itemCount > 99 ? "99+" : itemCount}
-                </span>
-              ) : null}
             </Link>
-          )}
+          ) : null}
         </div>
       </div>
     </header>
   );
 }
-

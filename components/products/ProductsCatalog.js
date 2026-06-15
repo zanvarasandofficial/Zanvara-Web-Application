@@ -1,17 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import {
-  allProducts,
-  catalogPriceBounds,
-  sortOptions,
-} from "../../lib/data/products";
+import { fetchAllProducts } from "../../lib/api/products";
+import { sortOptions } from "../../lib/data/products";
 import ProductCard from "./ProductCard";
 import ProductFilters, { countActiveFilters } from "./ProductFilters";
 import Reveal from "../ui/Reveal";
 import Pagination from "../ui/Pagination";
 
 const PRODUCTS_PER_PAGE = 13;
+const DEFAULT_PRICE_BOUNDS = { min: 0, max: 100000 };
 
 function getDiscountPercent(product) {
   if (!product.originalPrice || product.originalPrice <= product.price) {
@@ -20,6 +18,20 @@ function getDiscountPercent(product) {
 
   return Math.round(
     ((product.originalPrice - product.price) / product.originalPrice) * 100,
+  );
+}
+
+function getPriceBounds(products) {
+  if (!products.length) {
+    return DEFAULT_PRICE_BOUNDS;
+  }
+
+  return products.reduce(
+    (bounds, product) => ({
+      min: Math.min(bounds.min, product.price),
+      max: Math.max(bounds.max, product.price),
+    }),
+    { min: Infinity, max: 0 },
   );
 }
 
@@ -41,15 +53,51 @@ function sortProducts(products, sort) {
 }
 
 export default function ProductsCatalog() {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
   const [sort, setSort] = useState("featured");
-  const [minPrice, setMinPrice] = useState(catalogPriceBounds.min);
-  const [maxPrice, setMaxPrice] = useState(catalogPriceBounds.max);
+  const [minPrice, setMinPrice] = useState(DEFAULT_PRICE_BOUNDS.min);
+  const [maxPrice, setMaxPrice] = useState(DEFAULT_PRICE_BOUNDS.max);
   const [onSaleOnly, setOnSaleOnly] = useState(false);
   const [inStockOnly, setInStockOnly] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+
+  const priceBounds = useMemo(() => getPriceBounds(products), [products]);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadProducts() {
+      setLoading(true);
+
+      try {
+        const data = await fetchAllProducts();
+
+        if (!active) return;
+
+        setProducts(data);
+
+        if (data.length) {
+          const bounds = getPriceBounds(data);
+          setMinPrice(bounds.min);
+          setMaxPrice(bounds.max);
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadProducts();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -62,13 +110,13 @@ export default function ProductsCatalog() {
     maxPrice,
     onSaleOnly,
     inStockOnly,
-    priceBounds: catalogPriceBounds,
+    priceBounds,
   });
 
   const filteredProducts = useMemo(() => {
     const query = search.trim().toLowerCase();
 
-    const filtered = allProducts.filter((product) => {
+    const filtered = products.filter((product) => {
       const matchesSearch =
         !query ||
         product.name.toLowerCase().includes(query) ||
@@ -84,7 +132,7 @@ export default function ProductsCatalog() {
         !onSaleOnly ||
         (product.originalPrice && product.originalPrice > product.price);
 
-      const matchesStock = !inStockOnly || product.price > 0;
+      const matchesStock = !inStockOnly || product.stock > 0;
 
       return (
         matchesSearch &&
@@ -97,6 +145,7 @@ export default function ProductsCatalog() {
 
     return sortProducts(filtered, sort);
   }, [
+    products,
     search,
     category,
     sort,
@@ -126,8 +175,8 @@ export default function ProductsCatalog() {
     setSearch("");
     setCategory("all");
     setSort("featured");
-    setMinPrice(catalogPriceBounds.min);
-    setMaxPrice(catalogPriceBounds.max);
+    setMinPrice(priceBounds.min);
+    setMaxPrice(priceBounds.max);
     setOnSaleOnly(false);
     setInStockOnly(false);
   }
@@ -165,7 +214,7 @@ export default function ProductsCatalog() {
             onSaleOnlyChange={setOnSaleOnly}
             inStockOnly={inStockOnly}
             onInStockOnlyChange={setInStockOnly}
-            priceBounds={catalogPriceBounds}
+            priceBounds={priceBounds}
             sortOptions={sortOptions}
             onReset={resetFilters}
             resultCount={filteredProducts.length}
@@ -176,7 +225,13 @@ export default function ProductsCatalog() {
           />
         </Reveal>
 
-        {filteredProducts.length > 0 ? (
+        {loading ? (
+          <Reveal delay={120}>
+            <div className="mt-10 rounded-[1.75rem] border border-white/10 bg-white/[0.02] px-6 py-16 text-center text-sm text-zinc-400">
+              Loading products...
+            </div>
+          </Reveal>
+        ) : filteredProducts.length > 0 ? (
           <>
             <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
               {paginatedProducts.map((product, index) => (
@@ -196,17 +251,23 @@ export default function ProductsCatalog() {
         ) : (
           <Reveal delay={120}>
             <div className="mt-10 rounded-[1.75rem] border border-dashed border-white/10 bg-white/[0.02] px-6 py-16 text-center">
-              <p className="text-lg font-semibold text-white">No products found</p>
-              <p className="mt-2 text-sm text-zinc-400">
-                Try changing your search, category, or price range.
+              <p className="text-lg font-semibold text-white">
+                {products.length === 0 ? "No products available yet" : "No products found"}
               </p>
-              <button
-                type="button"
-                onClick={resetFilters}
-                className="mt-6 cursor-pointer rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-violet-600 px-5 py-3 text-sm font-semibold text-white transition-all duration-300 hover:shadow-[0_0_28px_rgba(139,92,246,0.28)]"
-              >
-                Clear all filters
-              </button>
+              <p className="mt-2 text-sm text-zinc-400">
+                {products.length === 0
+                  ? "Published products from the admin dashboard will appear here."
+                  : "Try changing your search, category, or price range."}
+              </p>
+              {products.length > 0 ? (
+                <button
+                  type="button"
+                  onClick={resetFilters}
+                  className="mt-6 cursor-pointer rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-violet-600 px-5 py-3 text-sm font-semibold text-white transition-all duration-300 hover:shadow-[0_0_28px_rgba(139,92,246,0.28)]"
+                >
+                  Clear all filters
+                </button>
+              ) : null}
             </div>
           </Reveal>
         )}

@@ -1,5 +1,7 @@
-import LandingPage from "../components/home/LandingPage";
+import LandingPageContent from "../components/home/LandingPageContent";
+
+export const dynamic = "force-dynamic";
 
 export default function Home() {
-  return <LandingPage />;
+  return <LandingPageContent />;
 }

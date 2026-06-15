@@ -1,6 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
+import { useToast } from "../../context/ToastContext";
+import { subscribeNewsletter } from "../../lib/api/inbound";
 import Logo from "../brand/Logo";
 import Reveal from "../ui/Reveal";
 import ContactLinks from "../ui/ContactLinks";
@@ -60,6 +63,32 @@ function FooterLinkColumn({ title, links, delay }) {
 
 export default function Footer() {
   const year = new Date().getFullYear();
+  const { showToast } = useToast();
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [subscribed, setSubscribed] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  async function handleNewsletterSubmit(event) {
+    event.preventDefault();
+
+    if (!newsletterEmail.trim()) {
+      showToast("Please enter your email.", "error");
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      const result = await subscribeNewsletter(newsletterEmail.trim());
+      setSubscribed(true);
+      setNewsletterEmail("");
+      showToast(result.message ?? "Subscribed successfully.");
+    } catch (submitError) {
+      showToast(submitError.message ?? "Could not subscribe.", "error");
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
     <footer className="relative mt-auto overflow-hidden">
@@ -111,10 +140,7 @@ export default function Footer() {
                   New arrivals, offers, and updates — straight to your inbox.
                 </p>
 
-                <form
-                  className="mt-5 space-y-3"
-                  onSubmit={(event) => event.preventDefault()}
-                >
+                <form className="mt-5 space-y-3" onSubmit={handleNewsletterSubmit}>
                   <label htmlFor="footer-email" className="sr-only">
                     Email address
                   </label>
@@ -122,16 +148,27 @@ export default function Footer() {
                     <input
                       id="footer-email"
                       type="email"
+                      required
+                      value={newsletterEmail}
+                      onChange={(event) => setNewsletterEmail(event.target.value)}
                       placeholder="you@example.com"
-                      className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none transition-all duration-300 placeholder:text-zinc-600 focus:border-violet-500/40 focus:bg-black/60 focus:shadow-[0_0_0_4px_rgba(139,92,246,0.12)]"
+                      disabled={subscribed}
+                      className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none transition-all duration-300 placeholder:text-zinc-600 focus:border-violet-500/40 focus:bg-black/60 focus:shadow-[0_0_0_4px_rgba(139,92,246,0.12)] disabled:opacity-60"
                     />
                   </div>
-                  <button
-                    type="submit"
-                    className="group relative w-full overflow-hidden rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-violet-600 bg-[length:200%_100%] px-4 py-3 text-sm font-semibold text-white transition-all duration-500 hover:bg-right hover:shadow-[0_0_30px_rgba(139,92,246,0.35)]"
-                  >
-                    Subscribe
-                  </button>
+                  {subscribed ? (
+                    <p className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+                      You are subscribed. Thank you!
+                    </p>
+                  ) : (
+                    <button
+                      type="submit"
+                      disabled={saving}
+                      className="group relative w-full overflow-hidden rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-violet-600 bg-[length:200%_100%] px-4 py-3 text-sm font-semibold text-white transition-all duration-500 hover:bg-right hover:shadow-[0_0_30px_rgba(139,92,246,0.35)] disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {saving ? "Subscribing..." : "Subscribe"}
+                    </button>
+                  )}
                 </form>
               </div>
             </Reveal>

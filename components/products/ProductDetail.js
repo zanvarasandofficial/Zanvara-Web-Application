@@ -5,13 +5,19 @@ import { useState } from "react";
 import { useCart } from "../../context/CartContext";
 import { useToast } from "../../context/ToastContext";
 import { formatPrice } from "../../lib/data/products";
+import { formatDeliveryLabel } from "../../lib/products/delivery";
 import Reveal from "../ui/Reveal";
 import ProductImageZoom from "./ProductImageZoom";
+import ProductDetailsContent from "./ProductDetailsContent";
+import ProductReviews from "./ProductReviews";
 
 export default function ProductDetail({ product }) {
-  const { addItem } = useCart();
+  const { addItem, items } = useCart();
   const { showToast } = useToast();
   const [quantity, setQuantity] = useState(1);
+
+  const cartItem = items.find((item) => item.productId === product.id);
+  const isInCart = Boolean(cartItem);
 
   const hasDiscount =
     product.originalPrice && product.originalPrice > product.price;
@@ -22,6 +28,9 @@ export default function ProductDetail({ product }) {
     : null;
   const inStock = product.stock > 0;
   const lowStock = product.stock > 0 && product.stock <= 5;
+  const badgeLabel = product.badge?.trim();
+  const deliveryLabel = formatDeliveryLabel(product);
+  const deliveryIsFree = deliveryLabel === "Free";
 
   function handleAddToCart() {
     const result = addItem(product, quantity);
@@ -62,15 +71,16 @@ export default function ProductDetail({ product }) {
             <ProductImageZoom
               src={product.image}
               hoverImage={product.hoverImage}
+              galleryImages={product.galleryImages ?? []}
               alt={product.name}
             />
           </Reveal>
 
           <Reveal delay={80}>
             <div className="flex h-full flex-col">
-              {product.badge ? (
+              {badgeLabel ? (
                 <span className="mb-4 inline-flex w-fit rounded-full border border-violet-500/20 bg-violet-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-violet-300">
-                  {product.badge}
+                  {badgeLabel}
                 </span>
               ) : null}
 
@@ -113,6 +123,16 @@ export default function ProductDetail({ product }) {
                     {product.category}
                   </span>
                 ) : null}
+                <span
+                  className={[
+                    "rounded-full px-3 py-1 font-medium",
+                    deliveryIsFree
+                      ? "border border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
+                      : "border border-amber-500/20 bg-amber-500/10 text-amber-200",
+                  ].join(" ")}
+                >
+                  Delivery: {deliveryLabel}
+                </span>
               </div>
 
               <p className="mt-6 text-base leading-8 text-zinc-400">
@@ -148,14 +168,23 @@ export default function ProductDetail({ product }) {
                     </button>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={handleAddToCart}
-                    disabled={!inStock}
-                    className="inline-flex min-w-[220px] flex-1 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-violet-600 px-6 py-3.5 text-sm font-semibold text-white transition-all duration-300 hover:shadow-[0_0_32px_rgba(139,92,246,0.35)] disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none"
-                  >
-                    Add to Cart
-                  </button>
+                  {isInCart ? (
+                    <Link
+                      href="/cart"
+                      className="inline-flex min-w-[220px] flex-1 items-center justify-center gap-2 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 px-6 py-3.5 text-sm font-semibold text-emerald-200 transition-all duration-300 hover:border-emerald-500/40 hover:bg-emerald-500/15 sm:flex-none"
+                    >
+                      Proceed to Cart ({cartItem.quantity} in cart)
+                    </Link>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleAddToCart}
+                      disabled={!inStock}
+                      className="inline-flex min-w-[220px] flex-1 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-violet-600 px-6 py-3.5 text-sm font-semibold text-white transition-all duration-300 hover:shadow-[0_0_32px_rgba(139,92,246,0.35)] disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none"
+                    >
+                      Add to Cart
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -163,7 +192,7 @@ export default function ProductDetail({ product }) {
                 {[
                   "Cash on delivery available",
                   "Secure packaging",
-                  "Fast nationwide delivery",
+                  deliveryIsFree ? "Free delivery on this item" : `Delivery: ${deliveryLabel}`,
                 ].map((item) => (
                   <div
                     key={item}
@@ -176,6 +205,10 @@ export default function ProductDetail({ product }) {
             </div>
           </Reveal>
         </div>
+
+        <ProductDetailsContent detailsHtml={product.detailsHtml} />
+
+        <ProductReviews productId={product.id} productName={product.name} />
       </div>
     </div>
   );
