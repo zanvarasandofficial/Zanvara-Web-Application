@@ -71,7 +71,7 @@ export default function ProductCard({ product }) {
           </span>
         ) : null}
 
-        <span
+        {/* <span
           className="absolute bottom-4 right-4 z-10 flex h-10 w-10 translate-y-2 items-center justify-center rounded-full border border-white/15 bg-black/45 text-white opacity-0 backdrop-blur-md transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100"
           aria-hidden="true"
         >
@@ -83,7 +83,7 @@ export default function ProductCard({ product }) {
             />
             <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.6" />
           </svg>
-        </span>
+        </span> */}
       </Link>
 
       <div className="flex flex-1 flex-col p-5">

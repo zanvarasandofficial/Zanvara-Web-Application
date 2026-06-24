@@ -9,7 +9,9 @@ import {
   useState,
 } from "react";
 import {
-  adminLogin as loginRequest,
+  adminLogin,
+  adminRequestOtp,
+  adminVerifyOtp,
   clearAdminSession,
   fetchAdminProfile,
   getAdminUser,
@@ -26,7 +28,8 @@ export function AdminAuthProvider({ children }) {
 
     try {
       const cachedUser = getAdminUser();
-      if (cachedUser) {
+
+      if (cachedUser?.role === "ADMIN") {
         setUser(cachedUser);
       }
 
@@ -45,8 +48,26 @@ export function AdminAuthProvider({ children }) {
   }, [bootstrap]);
 
   const login = useCallback(async (email, password) => {
-    const data = await loginRequest(email, password);
-    setUser(data.user);
+    const data = await adminLogin(email, password);
+
+    if (data.isAdmin) {
+      setUser(data.user);
+    }
+
+    return data;
+  }, []);
+
+  const sendOtp = useCallback(async (email, name) => {
+    return adminRequestOtp(email, name);
+  }, []);
+
+  const verifyOtp = useCallback(async (email, code, name, password) => {
+    const data = await adminVerifyOtp(email, code, name, password);
+
+    if (data.isAdmin) {
+      setUser(data.user);
+    }
+
     return data;
   }, []);
 
@@ -61,10 +82,12 @@ export function AdminAuthProvider({ children }) {
       isLoading,
       isAuthenticated: Boolean(user),
       login,
+      sendOtp,
+      verifyOtp,
       logout,
       refreshSession: bootstrap,
     }),
-    [user, isLoading, login, logout, bootstrap],
+    [user, isLoading, login, sendOtp, verifyOtp, logout, bootstrap],
   );
 
   return (

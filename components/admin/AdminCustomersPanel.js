@@ -4,7 +4,11 @@ import { useEffect, useMemo, useState } from "react";
 import AdminPageHeader from "./AdminPageHeader";
 import StatusBadge from "./StatusBadge";
 import { adminFetch } from "../../lib/api/admin-client";
-import { adminCardClassName } from "../../lib/ui/adminStyles";
+import {
+  adminCardClassName,
+  adminPrimaryButtonClassName,
+  adminSecondaryButtonClassName,
+} from "../../lib/ui/adminStyles";
 
 const providerFilters = [
   { value: "ALL", label: "All users" },
@@ -35,37 +39,42 @@ export default function AdminCustomersPanel({
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [promotingId, setPromotingId] = useState("");
+
+  async function loadUsers() {
+    setLoading(true);
+    setError("");
+
+    try {
+      const data = await adminFetch("/admin/users");
+      setUsers(data);
+    } catch (loadError) {
+      setError(loadError.message ?? "Could not load customers.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    let active = true;
-
-    async function loadUsers() {
-      setLoading(true);
-      setError("");
-
-      try {
-        const data = await adminFetch("/admin/users");
-
-        if (active) {
-          setUsers(data);
-        }
-      } catch (loadError) {
-        if (active) {
-          setError(loadError.message ?? "Could not load customers.");
-        }
-      } finally {
-        if (active) {
-          setLoading(false);
-        }
-      }
-    }
-
     loadUsers();
-
-    return () => {
-      active = false;
-    };
   }, []);
+
+  async function handleGrantAdmin(userId) {
+    setPromotingId(userId);
+
+    try {
+      await adminFetch(`/admin/users/${userId}/role`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role: "ADMIN" }),
+      });
+      await loadUsers();
+    } catch (grantError) {
+      setError(grantError.message ?? "Could not grant admin access.");
+    } finally {
+      setPromotingId("");
+    }
+  }
 
   const filteredUsers = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -156,18 +165,19 @@ export default function AdminCustomersPanel({
                 <th className="px-6 py-3 font-semibold">Sign-in method</th>
                 <th className="px-6 py-3 font-semibold">Email verified</th>
                 <th className="px-6 py-3 font-semibold">Joined</th>
+                {!compact ? <th className="px-6 py-3 font-semibold">Actions</th> : null}
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-slate-500">
+                  <td colSpan={compact ? 4 : 5} className="px-6 py-8 text-center text-slate-500">
                     Loading customers...
                   </td>
                 </tr>
               ) : visibleUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-slate-500">
+                  <td colSpan={compact ? 4 : 5} className="px-6 py-8 text-center text-slate-500">
                     No customers found yet.
                   </td>
                 </tr>
@@ -191,6 +201,18 @@ export default function AdminCustomersPanel({
                       />
                     </td>
                     <td className="px-6 py-4 text-slate-600">{formatDate(user.createdAt)}</td>
+                    {!compact ? (
+                      <td className="px-6 py-4">
+                        <button
+                          type="button"
+                          disabled={promotingId === user.id}
+                          onClick={() => handleGrantAdmin(user.id)}
+                          className={adminSecondaryButtonClassName}
+                        >
+                          {promotingId === user.id ? "Saving..." : "Make admin"}
+                        </button>
+                      </td>
+                    ) : null}
                   </tr>
                 ))
               )}

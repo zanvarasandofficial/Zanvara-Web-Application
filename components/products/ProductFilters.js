@@ -62,6 +62,7 @@ function FilterModal({
   onInStockOnlyChange,
   priceBounds,
   sortOptions,
+  categoryOptions = productCategories,
   onReset,
   onApply,
 }) {
@@ -141,7 +142,7 @@ function FilterModal({
                 className={selectClassName}
               >
                 <option value="all">All categories</option>
-                {productCategories.map((item) => (
+                {categoryOptions.map((item) => (
                   <option key={item} value={item}>
                     {item}
                   </option>
@@ -287,6 +288,7 @@ export default function ProductFilters({
   filterOpen,
   onFilterOpen,
   onFilterClose,
+  categoryOptions = productCategories,
 }) {
   return (
     <>
@@ -358,6 +360,7 @@ export default function ProductFilters({
         onInStockOnlyChange={onInStockOnlyChange}
         priceBounds={priceBounds}
         sortOptions={sortOptions}
+        categoryOptions={categoryOptions}
         onReset={onReset}
         onApply={onFilterClose}
       />

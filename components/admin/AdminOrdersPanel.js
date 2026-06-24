@@ -10,6 +10,7 @@ import {
   readOrderHistory,
   updateOrderStatus,
 } from "../../lib/orders/order-storage";
+import { getOrderStatusLabel } from "../../lib/orders/order-status";
 import {
   adminCardClassName,
   adminPrimaryButtonClassName,
@@ -79,7 +80,7 @@ export default function AdminOrdersPanel({ compact = false, title = "All orders"
             >
               {statusFilters.map((status) => (
                 <option key={status} value={status}>
-                  {status === "ALL" ? "All statuses" : status}
+                  {status === "ALL" ? "All statuses" : getOrderStatusLabel(status)}
                 </option>
               ))}
             </select>
@@ -138,7 +139,7 @@ export default function AdminOrdersPanel({ compact = false, title = "All orders"
                   </td>
                   <td className="px-6 py-4 text-slate-600">{order.date}</td>
                   <td className="px-6 py-4">
-                    <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex items-center gap-2">
                       <Link
                         href={`/dashboard/admin/orders/${order.id}`}
                         className={adminSecondaryButtonClassName}
@@ -159,7 +160,7 @@ export default function AdminOrdersPanel({ compact = false, title = "All orders"
                           >
                             {Object.values(ORDER_STATUS).map((status) => (
                               <option key={status} value={status}>
-                                {status}
+                                {getOrderStatusLabel(status)}
                               </option>
                             ))}
                           </select>

@@ -38,7 +38,6 @@ export default function CheckoutAuthModal({ open, onClose, onSuccess }) {
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [devMode, setDevMode] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -51,7 +50,6 @@ export default function CheckoutAuthModal({ open, onClose, onSuccess }) {
       setName("");
       setCode("");
       setIsSubmitting(false);
-      setDevMode(false);
     }
   }, [open]);
 
@@ -78,7 +76,6 @@ export default function CheckoutAuthModal({ open, onClose, onSuccess }) {
 
     try {
       const result = await sendOtp(email.trim(), name.trim());
-      setDevMode(Boolean(result.devMode));
       showToast(result.message, "success");
       setStep("otp");
     } catch (error) {
@@ -183,13 +180,6 @@ export default function CheckoutAuthModal({ open, onClose, onSuccess }) {
             <p className="rounded-2xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-zinc-400">
               Code sent to <span className="font-medium text-white">{email}</span>
             </p>
-
-            {devMode ? (
-              <p className="rounded-2xl border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm leading-6 text-amber-100">
-                SMTP abhi setup nahi hai. OTP email par nahi jayega — backend terminal mein
-                dekho: <span className="font-semibold">[DEV OTP] {email}: XXXXXX</span>
-              </p>
-            ) : null}
 
             <label className="flex flex-col gap-2.5">
               <span className={labelClassName}>Verification code</span>

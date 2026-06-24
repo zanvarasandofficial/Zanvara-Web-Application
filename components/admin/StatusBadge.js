@@ -1,3 +1,9 @@
+import {
+  getOrderStatusLabel,
+  isOrderStatusValue,
+  normalizeOrderStatus,
+} from "../../lib/orders/order-status";
+
 const toneStyles = {
   success: "bg-emerald-50 text-emerald-700 ring-emerald-200",
   warning: "bg-amber-50 text-amber-700 ring-amber-200",
@@ -8,6 +14,11 @@ const toneStyles = {
 };
 
 const statusToneMap = {
+  pending: "warning",
+  confirmed: "info",
+  shipped: "violet",
+  delivered: "success",
+  cancelled: "danger",
   Pending: "warning",
   Confirmed: "info",
   Shipped: "violet",
@@ -26,17 +37,20 @@ const statusToneMap = {
   "Email OTP": "info",
   Google: "violet",
   Verified: "success",
-  Pending: "warning",
 };
 
 export default function StatusBadge({ status, tone }) {
-  const resolvedTone = tone || statusToneMap[status] || "neutral";
+  const normalizedStatus = isOrderStatusValue(status)
+    ? normalizeOrderStatus(status)
+    : status;
+  const resolvedTone = tone || statusToneMap[normalizedStatus] || "neutral";
+  const label = isOrderStatusValue(status) ? getOrderStatusLabel(status) : status;
 
   return (
     <span
       className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${toneStyles[resolvedTone]}`}
     >
-      {status}
+      {label}
     </span>
   );
 }

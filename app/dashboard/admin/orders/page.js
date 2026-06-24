@@ -11,7 +11,7 @@ export default function AdminOrdersPage() {
       <AdminPageHeader
         eyebrow="Sales"
         title="Orders"
-        description="Real checkout orders from this browser. Mark as Delivered to unlock customer reviews."
+        description="Track fulfillment from warehouse dispatch to delivery. Update status so customers can follow their parcel."
       />
 
       <AdminOrdersPanel />

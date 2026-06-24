@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { A11y, Navigation } from "swiper/modules";
-import { categoryHighlights } from "../../lib/data/products";
 import SectionHeading from "../ui/SectionHeading";
 import { SliderNav } from "../ui/SliderNav";
 import Reveal from "../ui/Reveal";
@@ -31,9 +30,13 @@ function bindSliderNavigation(swiper, prevRef, nextRef) {
   });
 }
 
-export default function CategorySlider() {
+export default function CategorySlider({ categories = [] }) {
   const prevRef = useRef(null);
   const nextRef = useRef(null);
+
+  if (!categories.length) {
+    return null;
+  }
 
   return (
     <section className="relative overflow-hidden py-14 sm:py-16 lg:py-20">
@@ -73,10 +76,10 @@ export default function CategorySlider() {
               onSwiper={(swiper) => bindSliderNavigation(swiper, prevRef, nextRef)}
               className="category-swiper py-2"
             >
-              {categoryHighlights.map((category) => (
+              {categories.map((category) => (
                 <SwiperSlide key={category.id}>
                   <Link
-                    href="/products"
+                    href={`/products?category=${encodeURIComponent(category.name)}`}
                     className="group relative block overflow-hidden rounded-3xl border border-white/[0.08] bg-white/[0.03] shadow-[0_20px_50px_rgba(0,0,0,0.35)] transition-all duration-500 hover:border-violet-500/25"
                   >
                     <div className="relative aspect-[4/5] overflow-hidden">

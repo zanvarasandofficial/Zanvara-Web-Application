@@ -1,12 +1,73 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Reveal from "../ui/Reveal";
 import HeroMediaBackground from "./HeroMediaBackground";
+import {
+  fetchStorefrontStats,
+  formatHeroCount,
+  formatHeroRating,
+} from "../../lib/api/storefront-stats";
+import {
+  getPublishedReviews,
+  REVIEWS_CHANGED_EVENT,
+} from "../../lib/reviews/review-storage";
+
+function loadReviewRating() {
+  const reviews = getPublishedReviews();
+
+  if (reviews.length === 0) {
+    return 0;
+  }
+
+  const total = reviews.reduce((sum, review) => sum + review.rating, 0);
+  return total / reviews.length;
+}
 
 export default function HeroSection({ hero }) {
   const mediaType = hero?.mediaType ?? "video";
   const mediaUrl = hero?.mediaUrl ?? "";
+  const [stats, setStats] = useState({
+    products: "—",
+    customers: "—",
+    rating: "—",
+  });
+
+  useEffect(() => {
+    function applyStats(apiStats, ratingValue) {
+      setStats({
+        products: formatHeroCount(apiStats?.productCount ?? 0),
+        customers: formatHeroCount(apiStats?.customerCount ?? 0),
+        rating: formatHeroRating(ratingValue),
+      });
+    }
+
+    async function loadStats() {
+      const ratingValue = loadReviewRating();
+
+      try {
+        const apiStats = await fetchStorefrontStats();
+        applyStats(apiStats, ratingValue);
+      } catch {
+        applyStats({ productCount: 0, customerCount: 0 }, ratingValue);
+      }
+    }
+
+    loadStats();
+
+    function handleReviewsChanged() {
+      loadStats();
+    }
+
+    window.addEventListener(REVIEWS_CHANGED_EVENT, handleReviewsChanged);
+    const interval = window.setInterval(loadStats, 60000);
+
+    return () => {
+      window.removeEventListener(REVIEWS_CHANGED_EVENT, handleReviewsChanged);
+      window.clearInterval(interval);
+    };
+  }, []);
 
   return (
     <section className="relative min-h-[70vh] overflow-hidden sm:min-h-[78vh] lg:min-h-[85vh]">
@@ -46,9 +107,9 @@ export default function HeroSection({ hero }) {
 
             <div className="mt-10 grid grid-cols-3 gap-4 border-t border-white/[0.06] pt-8">
               {[
-                { value: "2K+", label: "Products" },
-                { value: "50K+", label: "Happy Customers" },
-                { value: "4.9", label: "Average Rating" },
+                { value: stats.products, label: "Products" },
+                { value: stats.customers, label: "Happy Customers" },
+                { value: stats.rating, label: "Average Rating" },
               ].map((stat) => (
                 <div key={stat.label}>
                   <p className="text-2xl font-bold text-white">{stat.value}</p>

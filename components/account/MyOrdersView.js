@@ -2,25 +2,30 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import OrderTrackingTimeline from "../orders/OrderTrackingTimeline";
 import { formatPrice } from "../../lib/data/products";
+import {
+  getOrderStatusLabel,
+  isOrderDelivered,
+} from "../../lib/orders/order-status";
 import { readOrderHistory } from "../../lib/orders/order-storage";
 import Reveal from "../ui/Reveal";
 import ReviewSubmitModal from "../reviews/ReviewSubmitModal";
 
 const statusStyles = {
-  Pending: "border-amber-500/20 bg-amber-500/10 text-amber-300",
-  Confirmed: "border-sky-500/20 bg-sky-500/10 text-sky-300",
-  Shipped: "border-violet-500/20 bg-violet-500/10 text-violet-300",
-  Delivered: "border-emerald-500/20 bg-emerald-500/10 text-emerald-300",
-  Cancelled: "border-rose-500/20 bg-rose-500/10 text-rose-300",
+  pending: "border-amber-500/20 bg-amber-500/10 text-amber-300",
+  confirmed: "border-sky-500/20 bg-sky-500/10 text-sky-300",
+  shipped: "border-violet-500/20 bg-violet-500/10 text-violet-300",
+  delivered: "border-emerald-500/20 bg-emerald-500/10 text-emerald-300",
+  cancelled: "border-rose-500/20 bg-rose-500/10 text-rose-300",
 };
 
 function OrderStatusPill({ status }) {
   return (
     <span
-      className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${statusStyles[status] || statusStyles.Pending}`}
+      className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${statusStyles[status] || statusStyles.pending}`}
     >
-      {status}
+      {getOrderStatusLabel(status)}
     </span>
   );
 }
@@ -30,7 +35,24 @@ export default function MyOrdersView() {
   const [reviewTarget, setReviewTarget] = useState(null);
 
   useEffect(() => {
-    setOrders(readOrderHistory());
+    function loadOrders() {
+      setOrders(readOrderHistory());
+    }
+
+    loadOrders();
+
+    function handleStorage(event) {
+      if (event.key === "zanvara-orders" || event.key === null) {
+        loadOrders();
+      }
+    }
+
+    window.addEventListener("storage", handleStorage);
+    window.addEventListener("zanvara-orders-changed", loadOrders);
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("zanvara-orders-changed", loadOrders);
+    };
   }, []);
 
   return (
@@ -43,8 +65,9 @@ export default function MyOrdersView() {
             </p>
             <h1 className="mt-3 text-4xl font-semibold text-white">Order history</h1>
             <p className="mt-3 text-sm leading-7 text-zinc-400">
-              Review sirf tab available hoti hai jab order status{" "}
-              <span className="font-medium text-emerald-300">Delivered</span> ho jaye.
+              Track your parcel from warehouse dispatch to delivery. Reviews unlock once your
+              order is marked{" "}
+              <span className="font-medium text-emerald-300">Delivered</span>.
             </p>
           </Reveal>
 
@@ -78,6 +101,10 @@ export default function MyOrdersView() {
                       <OrderStatusPill status={order.status} />
                     </div>
 
+                    <div className="mt-6">
+                      <OrderTrackingTimeline status={order.status} variant="dark" compact />
+                    </div>
+
                     <div className="mt-5 space-y-3">
                       {order.items?.map((item) => (
                         <div
@@ -92,7 +119,7 @@ export default function MyOrdersView() {
                             <span className="text-sm font-semibold text-white">
                               {formatPrice(item.price * item.quantity)}
                             </span>
-                            {order.status === "Delivered" ? (
+                            {isOrderDelivered(order.status) ? (
                               <button
                                 type="button"
                                 onClick={() =>

@@ -207,6 +207,24 @@ body {
   color: #c4b5fd;
 }
 
+.rich-text-editor img.rich-text-image,
+.product-details-content img.rich-text-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-top: 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.rich-text-editor img.rich-text-image {
+  border-color: #e2e8f0;
+}
+
+.product-details-content p:has(> img.rich-text-image) {
+  margin-top: 1rem;
+}
+
 
 
 /* width */

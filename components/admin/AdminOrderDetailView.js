@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import AdminPageHeader from "./AdminPageHeader";
+import OrderTrackingTimeline from "../orders/OrderTrackingTimeline";
 import StatusBadge from "./StatusBadge";
 import { formatPrice } from "../../lib/data/products";
 import {
@@ -12,6 +13,7 @@ import {
   getOrderById,
   updateOrderStatus,
 } from "../../lib/orders/order-storage";
+import { getOrderStatusLabel } from "../../lib/orders/order-status";
 import {
   adminCardClassName,
   adminPrimaryButtonClassName,
@@ -74,7 +76,7 @@ export default function AdminOrderDetailView({ orderId }) {
       <AdminPageHeader
         eyebrow="Sales"
         title={`Order ${order.id}`}
-        description="Review order details and update fulfillment status."
+        description="Review order details, update fulfillment status, and track warehouse dispatch."
         action={
           <Link href="/dashboard/admin/orders" className={adminSecondaryButtonClassName}>
             Back to orders
@@ -120,6 +122,17 @@ export default function AdminOrderDetailView({ orderId }) {
                   {formatPrice(order.total)}
                 </p>
               </div>
+            </div>
+          </section>
+
+          <section className={`${adminCardClassName} p-6`}>
+            <h2 className="text-lg font-semibold text-slate-900">Fulfillment tracking</h2>
+            <p className="mt-2 text-sm text-slate-500">
+              Update the status when the parcel leaves the warehouse or is delivered to the
+              customer.
+            </p>
+            <div className="mt-5">
+              <OrderTrackingTimeline status={order.status} variant="light" />
             </div>
           </section>
 
@@ -199,7 +212,9 @@ export default function AdminOrderDetailView({ orderId }) {
         <section className={`${adminCardClassName} h-fit p-6`}>
           <h2 className="text-lg font-semibold text-slate-900">Update status</h2>
           <p className="mt-2 text-sm text-slate-500">
-            Mark as Delivered to unlock customer reviews for these products.
+            Mark as <strong>Dispatched from Warehouse</strong> when the parcel leaves, and{" "}
+            <strong>Delivered</strong> when the customer receives it. Reviews unlock after
+            delivery.
           </p>
           <label className="mt-5 flex flex-col gap-2">
             <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
@@ -212,7 +227,7 @@ export default function AdminOrderDetailView({ orderId }) {
             >
               {Object.values(ORDER_STATUS).map((value) => (
                 <option key={value} value={value}>
-                  {value}
+                  {getOrderStatusLabel(value)}
                 </option>
               ))}
             </select>

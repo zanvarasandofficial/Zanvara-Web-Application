@@ -12,20 +12,30 @@ import { saveLastOrder } from "../../lib/cart/storage";
 import { ORDER_STATUS, saveOrderToHistory } from "../../lib/orders/order-storage";
 import { inputClassName, labelClassName } from "../../lib/ui/formStyles";
 import Reveal from "../ui/Reveal";
+import OrderCompleteSuccess from "./OrderCompleteSuccess";
 
 export default function CheckoutView() {
   const router = useRouter();
   const { items, subtotal, deliveryTotal, total, clearCart, isReady } = useCart();
   const { user, isLoading: isAuthLoading, isAuthenticated } = useCustomerAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [completedOrder, setCompletedOrder] = useState(null);
 
   useEffect(() => {
-    if (isReady && items.length === 0) {
+    if (isReady && items.length === 0 && !completedOrder) {
       router.replace("/cart");
     }
-  }, [isReady, items.length, router]);
+  }, [isReady, items.length, router, completedOrder]);
 
-  if (!isReady || items.length === 0) {
+  if (!isReady) {
+    return null;
+  }
+
+  if (completedOrder) {
+    return <OrderCompleteSuccess order={completedOrder} />;
+  }
+
+  if (items.length === 0) {
     return null;
   }
 
@@ -61,8 +71,9 @@ export default function CheckoutView() {
 
     saveLastOrder(order);
     saveOrderToHistory(order);
+    setCompletedOrder(order);
     clearCart();
-    router.push(`/checkout/success?order=${order.id}`);
+    router.replace(`/checkout/success?order=${order.id}`);
   }
 
   return (

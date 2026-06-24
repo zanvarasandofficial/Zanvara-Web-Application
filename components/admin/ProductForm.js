@@ -83,6 +83,7 @@ export default function ProductForm({
   const [mainPreviewUrl, setMainPreviewUrl] = useState("");
   const [hoverPreviewUrl, setHoverPreviewUrl] = useState("");
   const [galleryImages, setGalleryImages] = useState(() => mapGalleryFromProduct(initialValues));
+  const [categoryOptions, setCategoryOptions] = useState([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -110,6 +111,33 @@ export default function ProductForm({
 
     return () => URL.revokeObjectURL(previewUrl);
   }, [hoverImageFile]);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadCategories() {
+      try {
+        const data = await adminFetch("/admin/categories");
+        const names = Array.isArray(data) ? data.map((item) => item.name).filter(Boolean) : [];
+
+        if (!active || !names.length) return;
+
+        setCategoryOptions(names);
+        setForm((current) => ({
+          ...current,
+          category: names.includes(current.category) ? current.category : names[0],
+        }));
+      } catch {
+        // Keep existing category value if admin categories fail to load.
+      }
+    }
+
+    loadCategories();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!initialValues) return;
@@ -327,7 +355,8 @@ export default function ProductForm({
               <div className="flex flex-col gap-2">
                 <span className={adminLabelClassName}>Details</span>
                 <p className="text-sm text-slate-500">
-                  Add formatted product details with bold, italic, color, and bullet points.
+                  Add formatted product details with bold, italic, color, bullet points, images,
+                  and custom image width/height.
                 </p>
                 <RichTextEditor
                   value={form.detailsHtml}
@@ -583,7 +612,7 @@ export default function ProductForm({
                   onChange={(event) => updateField("category", event.target.value)}
                   className={adminSelectClassName}
                 >
-                  {productCategories.map((category) => (
+                  {(categoryOptions.length ? categoryOptions : productCategories).map((category) => (
                     <option key={category} value={category}>
                       {category}
                     </option>

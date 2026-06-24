@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import ProductsCatalog from "../../components/products/ProductsCatalog";
 
 export const metadata = {
@@ -6,5 +7,9 @@ export const metadata = {
 };
 
 export default function ProductsPage() {
-  return <ProductsCatalog />;
+  return (
+    <Suspense fallback={null}>
+      <ProductsCatalog />
+    </Suspense>
+  );
 }

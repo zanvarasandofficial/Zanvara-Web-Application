@@ -6,6 +6,7 @@ import ProductSlider from "../sections/ProductSlider";
 import CategorySlider from "../sections/CategorySlider";
 import ReviewsSection from "../sections/ReviewsSection";
 import PromoBanner from "../sections/PromoBanner";
+import { fetchStorefrontCategories } from "../../lib/api/categories";
 import { fetchHeroSettings } from "../../lib/api/hero";
 import { fetchLandingProducts } from "../../lib/api/products";
 
@@ -28,6 +29,7 @@ function LandingSkeleton() {
 export default function LandingPageContent() {
   const [hero, setHero] = useState(null);
   const [landingProducts, setLandingProducts] = useState(null);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
 
@@ -39,15 +41,17 @@ export default function LandingPageContent() {
       setLoadError("");
 
       try {
-        const [heroData, productsData] = await Promise.all([
+        const [heroData, productsData, categoriesData] = await Promise.all([
           fetchHeroSettings(),
           fetchLandingProducts(),
+          fetchStorefrontCategories(),
         ]);
 
         if (!active) return;
 
         setHero(heroData);
         setLandingProducts(productsData ?? { popular: [], latest: [], bestDeals: [] });
+        setCategories(Array.isArray(categoriesData) ? categoriesData : []);
 
         if (!heroData?.mediaUrl && !productsData?.latest?.length) {
           setLoadError(
@@ -122,7 +126,7 @@ export default function LandingPageContent() {
         />
       ) : null}
 
-      <CategorySlider />
+      <CategorySlider categories={categories} />
 
       <ReviewsSection />
     </>

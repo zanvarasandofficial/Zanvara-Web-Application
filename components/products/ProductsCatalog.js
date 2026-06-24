@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { fetchAllProducts } from "../../lib/api/products";
+import { fetchCategoryNames } from "../../lib/api/categories";
 import { sortOptions } from "../../lib/data/products";
 import ProductCard from "./ProductCard";
 import ProductFilters, { countActiveFilters } from "./ProductFilters";
@@ -53,10 +55,13 @@ function sortProducts(products, sort) {
 }
 
 export default function ProductsCatalog() {
+  const searchParams = useSearchParams();
+  const initialCategory = searchParams.get("category") ?? "all";
   const [products, setProducts] = useState([]);
+  const [categoryOptions, setCategoryOptions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("all");
+  const [category, setCategory] = useState(initialCategory);
   const [sort, setSort] = useState("featured");
   const [minPrice, setMinPrice] = useState(DEFAULT_PRICE_BOUNDS.min);
   const [maxPrice, setMaxPrice] = useState(DEFAULT_PRICE_BOUNDS.max);
@@ -74,11 +79,15 @@ export default function ProductsCatalog() {
       setLoading(true);
 
       try {
-        const data = await fetchAllProducts();
+        const [data, names] = await Promise.all([
+          fetchAllProducts(),
+          fetchCategoryNames(),
+        ]);
 
         if (!active) return;
 
         setProducts(data);
+        setCategoryOptions(Array.isArray(names) ? names : []);
 
         if (data.length) {
           const bounds = getPriceBounds(data);
@@ -98,6 +107,10 @@ export default function ProductsCatalog() {
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    setCategory(initialCategory);
+  }, [initialCategory]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -200,6 +213,7 @@ export default function ProductsCatalog() {
 
         <Reveal delay={80}>
           <ProductFilters
+            categoryOptions={categoryOptions}
             search={search}
             onSearchChange={setSearch}
             category={category}

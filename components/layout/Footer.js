@@ -6,9 +6,8 @@ import { useToast } from "../../context/ToastContext";
 import { subscribeNewsletter } from "../../lib/api/inbound";
 import Logo from "../brand/Logo";
 import Reveal from "../ui/Reveal";
-import ContactLinks from "../ui/ContactLinks";
+import FooterContactIcons from "../ui/FooterContactIcons";
 import FooterVideoBackground from "./FooterVideoBackground";
-import SocialLinks from "./SocialLinks";
 
 const footerLinks = {
   shop: [
@@ -20,25 +19,15 @@ const footerLinks = {
   company: [
     { href: "/about", label: "About Us" },
     { href: "/contact", label: "Contact" },
-    { href: "#", label: "Careers" },
-    { href: "#", label: "Blog" },
-  ],
-  support: [
-    { href: "#", label: "Help Center" },
-    { href: "#", label: "Shipping Info" },
-    { href: "#", label: "Returns" },
-    { href: "#", label: "Privacy Policy" },
   ],
 };
 
-function FooterLinkColumn({ title, links, delay }) {
+function FooterLinkColumn({ title, links, delay, className = "" }) {
   return (
     <Reveal delay={delay}>
-      <div>
-        <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.22em] text-zinc-500">
-          {title}
-        </h3>
-        <ul className="space-y-3">
+      <div className={className}>
+        <h3 className="mb-4 text-sm font-semibold text-white">{title}</h3>
+        <ul className="space-y-2.5">
           {links.map((link) => (
             <li key={link.label}>
               <Link
@@ -58,6 +47,15 @@ function FooterLinkColumn({ title, links, delay }) {
         </ul>
       </div>
     </Reveal>
+  );
+}
+
+function FooterLinksGrid() {
+  return (
+    <div className="grid grid-cols-2 gap-8 sm:gap-12 lg:col-span-5">
+      <FooterLinkColumn title="Shop" links={footerLinks.shop} delay={80} />
+      <FooterLinkColumn title="Company" links={footerLinks.company} delay={120} />
+    </div>
   );
 }
 
@@ -108,69 +106,38 @@ export default function Footer() {
                 Curated products. Premium experience. Zanvara brings modern
                 commerce to your screen with style, speed, and trust.
               </p>
-              <ContactLinks className="mt-6" />
-              <div className="mt-6">
-                <SocialLinks />
-              </div>
+              <FooterContactIcons className="mt-6" />
             </Reveal>
 
-            <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:col-span-5 lg:gap-10">
-              <FooterLinkColumn title="Shop" links={footerLinks.shop} delay={80} />
-              <FooterLinkColumn
-                title="Company"
-                links={footerLinks.company}
-                delay={140}
-              />
-              <FooterLinkColumn
-                title="Support"
-                links={footerLinks.support}
-                delay={200}
-              />
-            </div>
+            <FooterLinksGrid />
 
-            <Reveal className="lg:col-span-3" delay={260}>
-              <div className="rounded-3xl border border-white/[0.08] bg-white/[0.03] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-300/90">
-                  Stay in the loop
-                </p>
-                <h3 className="mt-3 text-lg font-semibold text-white">
-                  Get exclusive drops
-                </h3>
-                <p className="mt-2 text-sm leading-6 text-zinc-400">
-                  New arrivals, offers, and updates — straight to your inbox.
-                </p>
-
-                <form className="mt-5 space-y-3" onSubmit={handleNewsletterSubmit}>
-                  <label htmlFor="footer-email" className="sr-only">
-                    Email address
-                  </label>
-                  <div className="group relative">
-                    <input
-                      id="footer-email"
-                      type="email"
-                      required
-                      value={newsletterEmail}
-                      onChange={(event) => setNewsletterEmail(event.target.value)}
-                      placeholder="you@example.com"
-                      disabled={subscribed}
-                      className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none transition-all duration-300 placeholder:text-zinc-600 focus:border-violet-500/40 focus:bg-black/60 focus:shadow-[0_0_0_4px_rgba(139,92,246,0.12)] disabled:opacity-60"
-                    />
-                  </div>
-                  {subscribed ? (
-                    <p className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
-                      You are subscribed. Thank you!
-                    </p>
-                  ) : (
-                    <button
-                      type="submit"
-                      disabled={saving}
-                      className="group relative w-full overflow-hidden rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-violet-600 bg-[length:200%_100%] px-4 py-3 text-sm font-semibold text-white transition-all duration-500 hover:bg-right hover:shadow-[0_0_30px_rgba(139,92,246,0.35)] disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {saving ? "Subscribing..." : "Subscribe"}
-                    </button>
-                  )}
-                </form>
-              </div>
+            <Reveal className="lg:col-span-3 lg:flex lg:items-start lg:justify-end" delay={260}>
+              <form className="w-full max-w-sm space-y-3" onSubmit={handleNewsletterSubmit}>
+                <label htmlFor="footer-email" className="sr-only">
+                  Email address
+                </label>
+                <input
+                  id="footer-email"
+                  type="email"
+                  required
+                  value={newsletterEmail}
+                  onChange={(event) => setNewsletterEmail(event.target.value)}
+                  placeholder="you@example.com"
+                  disabled={subscribed}
+                  className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none transition-all duration-300 placeholder:text-zinc-600 focus:border-violet-500/40 focus:bg-black/60 focus:shadow-[0_0_0_4px_rgba(139,92,246,0.12)] disabled:opacity-60"
+                />
+                {subscribed ? (
+                  <p className="text-sm text-emerald-300">You are subscribed. Thank you!</p>
+                ) : (
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="w-full cursor-pointer rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-violet-600 px-4 py-3 text-sm font-semibold text-white transition-all duration-300 hover:shadow-[0_0_30px_rgba(139,92,246,0.35)] disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {saving ? "Subscribing..." : "Subscribe"}
+                  </button>
+                )}
+              </form>
             </Reveal>
           </div>
 
@@ -181,22 +148,16 @@ export default function Footer() {
               </p>
               <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
                 <Link
-                  href="#"
+                  href="/terms"
                   className="text-zinc-500 transition-colors duration-300 hover:text-zinc-200"
                 >
                   Terms
                 </Link>
                 <Link
-                  href="#"
+                  href="/privacy"
                   className="text-zinc-500 transition-colors duration-300 hover:text-zinc-200"
                 >
                   Privacy
-                </Link>
-                <Link
-                  href="#"
-                  className="text-zinc-500 transition-colors duration-300 hover:text-zinc-200"
-                >
-                  Cookies
                 </Link>
                 <span className="hidden h-1 w-1 rounded-full bg-zinc-700 sm:inline-block" />
                 <span className="inline-flex items-center gap-2 text-zinc-500">
