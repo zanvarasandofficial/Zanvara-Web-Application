@@ -83,7 +83,7 @@ const sections = [
   {
     title: "10. Updates & contact",
     paragraphs: [
-      "We may update this Privacy Policy from time to time. Changes will be posted on this page with an updated date. hello world",
+      "We may update this Privacy Policy from time to time. Changes will be posted on this page with an updated date.",
       `For privacy-related questions, contact us at ${CONTACT_EMAIL} or visit our contact page.`,
     ],
   },
