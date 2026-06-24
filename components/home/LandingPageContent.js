@@ -55,13 +55,13 @@ export default function LandingPageContent() {
 
         if (!heroData?.mediaUrl && !productsData?.latest?.length) {
           setLoadError(
-            "Store content load nahi ho saka. Backend chal raha hai? Zanvara Backend folder mein npm run dev chalao.",
+            "Store content load nahi ho saka. Frontend env check karo: NEXT_PUBLIC_API_URL = https://zanvara-backend.vercel.app/api",
           );
         }
       } catch {
         if (active) {
           setLoadError(
-            "Store content load nahi ho saka. Backend chal raha hai? Zanvara Backend folder mein npm run dev chalao.",
+            "Store content load nahi ho saka. API URL ya CORS check karo. NEXT_PUBLIC_API_URL = https://zanvara-backend.vercel.app/api",
           );
           setLandingProducts({ popular: [], latest: [], bestDeals: [] });
         }
