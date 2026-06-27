@@ -5,39 +5,29 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { A11y, Navigation } from "swiper/modules";
 import ProductCard from "../products/ProductCard";
 import SectionHeading from "../ui/SectionHeading";
+import { ProductSliderShimmer, PRODUCT_SLIDER_BREAKPOINTS } from "../ui/LandingShimmers";
 import { SliderNav } from "../ui/SliderNav";
 import Reveal from "../ui/Reveal";
+import {
+  bindSliderNavigation,
+  configureSwiperNavigation,
+} from "../../lib/swiper/bindSliderNavigation";
 
 import "swiper/css";
-
-const sliderBreakpoints = {
-  640: { slidesPerView: 2, spaceBetween: 20 },
-  1024: { slidesPerView: 3, spaceBetween: 24 },
-  1280: { slidesPerView: 4, spaceBetween: 24 },
-};
-
-function bindSliderNavigation(swiper, prevRef, nextRef) {
-  swiper.params.navigation.prevEl = prevRef.current;
-  swiper.params.navigation.nextEl = nextRef.current;
-
-  window.setTimeout(() => {
-    swiper.params.navigation.prevEl = prevRef.current;
-    swiper.params.navigation.nextEl = nextRef.current;
-    swiper.navigation.destroy();
-    swiper.navigation.init();
-    swiper.navigation.update();
-  });
-}
 
 export default function ProductSlider({
   eyebrow,
   title,
   subtitle,
-  products,
+  products = [],
+  loading = false,
+  emptyMessage = "No products found.",
   className = "",
 }) {
   const prevRef = useRef(null);
   const nextRef = useRef(null);
+  const hasProducts = products.length > 0;
+  const showSlider = !loading && hasProducts;
 
   return (
     <section
@@ -49,38 +39,43 @@ export default function ProductSlider({
             eyebrow={eyebrow}
             title={title}
             subtitle={subtitle}
-            actions={<SliderNav prevRef={prevRef} nextRef={nextRef} />}
+            actions={showSlider ? <SliderNav prevRef={prevRef} nextRef={nextRef} /> : null}
           />
         </Reveal>
 
         <Reveal delay={120}>
-          <div className="overflow-hidden">
-            <Swiper
-              modules={[Navigation, A11y]}
-              spaceBetween={16}
-              slidesPerView={1}
-              speed={650}
-              grabCursor
-              watchOverflow
-              breakpoints={sliderBreakpoints}
-              navigation={{
-                prevEl: prevRef.current,
-                nextEl: nextRef.current,
-              }}
-              onBeforeInit={(swiper) => {
-                swiper.params.navigation.prevEl = prevRef.current;
-                swiper.params.navigation.nextEl = nextRef.current;
-              }}
-              onSwiper={(swiper) => bindSliderNavigation(swiper, prevRef, nextRef)}
-              className="product-swiper py-2"
-            >
-              {products.map((product) => (
-                <SwiperSlide key={product.id}>
-                  <ProductCard product={product} />
-                </SwiperSlide>
-              ))}
-            </Swiper>
-          </div>
+          {loading ? <ProductSliderShimmer /> : null}
+
+          {!loading && !hasProducts ? (
+            <p className="py-8 text-center text-sm text-zinc-500">{emptyMessage}</p>
+          ) : null}
+
+          {showSlider ? (
+            <div className="overflow-hidden">
+              <Swiper
+                modules={[Navigation, A11y]}
+                spaceBetween={16}
+                slidesPerView={1}
+                speed={650}
+                grabCursor
+                watchOverflow
+                breakpoints={PRODUCT_SLIDER_BREAKPOINTS}
+                navigation={{
+                  prevEl: prevRef.current,
+                  nextEl: nextRef.current,
+                }}
+                onBeforeInit={(swiper) => configureSwiperNavigation(swiper, prevRef, nextRef)}
+                onSwiper={(swiper) => bindSliderNavigation(swiper, prevRef, nextRef)}
+                className="product-swiper py-2"
+              >
+                {products.map((product) => (
+                  <SwiperSlide key={product.id}>
+                    <ProductCard product={product} />
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            </div>
+          ) : null}
         </Reveal>
       </div>
     </section>

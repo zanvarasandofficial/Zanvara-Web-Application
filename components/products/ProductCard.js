@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useCart } from "../../context/CartContext";
 import { useToast } from "../../context/ToastContext";
 import { formatPrice } from "../../lib/data/products";
+import { PRODUCT_CARD_IMAGE_ASPECT } from "../../lib/ui/product-card-layout";
 
 export default function ProductCard({ product }) {
   const { addItem } = useCart();
@@ -38,7 +39,7 @@ export default function ProductCard({ product }) {
     <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-white/[0.08] bg-white/[0.03] shadow-[0_20px_50px_rgba(0,0,0,0.35)] transition-all duration-500 hover:border-violet-500/25 hover:shadow-[0_24px_60px_rgba(139,92,246,0.15)]">
       <Link
         href={productHref}
-        className="relative block aspect-[4/5] overflow-hidden bg-zinc-900"
+        className={`relative block ${PRODUCT_CARD_IMAGE_ASPECT} overflow-hidden bg-zinc-900`}
       >
         <Image
           src={product.image}
@@ -86,9 +87,9 @@ export default function ProductCard({ product }) {
         </span> */}
       </Link>
 
-      <div className="flex flex-1 flex-col p-5">
+      <div className="flex flex-1 flex-col p-4">
         <Link href={productHref}>
-          <h3 className="line-clamp-2 min-h-[3rem] text-base font-semibold leading-snug text-white transition-colors duration-300 group-hover:text-violet-200">
+          <h3 className="line-clamp-2 min-h-[2.75rem] text-base font-semibold leading-snug text-white transition-colors duration-300 group-hover:text-violet-200">
             {product.name}
           </h3>
         </Link>
@@ -107,7 +108,7 @@ export default function ProductCard({ product }) {
         <button
           type="button"
           onClick={handleAddToCart}
-          className="group/btn relative mt-5 w-full cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-white transition-all duration-300 hover:border-violet-500/35 hover:shadow-[0_0_24px_rgba(139,92,246,0.2)]"
+          className="group/btn relative mt-4 w-full cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:border-violet-500/35 hover:shadow-[0_0_24px_rgba(139,92,246,0.2)]"
         >
           <span
             aria-hidden="true"

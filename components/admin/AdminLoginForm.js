@@ -271,10 +271,10 @@ export default function AdminLoginForm() {
               />
             </label>
 
-            <p className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs leading-6 text-slate-600">
+            {/* <p className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs leading-6 text-slate-600">
               Account banne ke baad aap storefront par sign in honge. Agar aap ka role baad mein{" "}
               <strong>ADMIN</strong> ho jaye to login par seedha admin dashboard khulega.
-            </p>
+            </p> */}
 
             {error ? (
               <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">

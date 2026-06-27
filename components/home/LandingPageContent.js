@@ -10,25 +10,13 @@ import { fetchStorefrontCategories } from "../../lib/api/categories";
 import { fetchHeroSettings } from "../../lib/api/hero";
 import { fetchLandingProducts } from "../../lib/api/products";
 
-function LandingSkeleton() {
-  return (
-    <div className="animate-pulse">
-      <div className="min-h-[70vh] bg-[#0a0a0f]" />
-      <div className="mx-auto max-w-7xl space-y-8 px-4 py-16 sm:px-6 lg:px-8">
-        <div className="h-8 w-48 rounded-full bg-white/10" />
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, index) => (
-            <div key={index} className="aspect-[4/5] rounded-3xl bg-white/5" />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function LandingPageContent() {
   const [hero, setHero] = useState(null);
-  const [landingProducts, setLandingProducts] = useState(null);
+  const [landingProducts, setLandingProducts] = useState({
+    popular: [],
+    latest: [],
+    bestDeals: [],
+  });
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
@@ -64,6 +52,7 @@ export default function LandingPageContent() {
             "Store content load nahi ho saka. API URL ya CORS check karo. NEXT_PUBLIC_API_URL = https://zanvara-backend.vercel.app/api",
           );
           setLandingProducts({ popular: [], latest: [], bestDeals: [] });
+          setCategories([]);
         }
       } finally {
         if (active) {
@@ -79,11 +68,7 @@ export default function LandingPageContent() {
     };
   }, []);
 
-  if (loading) {
-    return <LandingSkeleton />;
-  }
-
-  const { popular = [], latest = [], bestDeals = [] } = landingProducts ?? {};
+  const { popular = [], latest = [], bestDeals = [] } = landingProducts;
 
   return (
     <>
@@ -95,38 +80,35 @@ export default function LandingPageContent() {
 
       <HeroSection hero={hero} />
 
-      {popular.length > 0 ? (
-        <ProductSlider
-          eyebrow="Customer Favorites"
-          title="Popular Products"
-          subtitle="The most-loved items this week — handpicked for quality, value, and style."
-          products={popular}
-        />
-      ) : null}
+      <ProductSlider
+        eyebrow="Customer Favorites"
+        title="Popular Products"
+        subtitle="The most-loved items this week — handpicked for quality, value, and style."
+        products={popular}
+        loading={loading}
+      />
 
-      {latest.length > 0 ? (
-        <div className="border-y border-white/[0.05] bg-white/[0.015]">
-          <ProductSlider
-            eyebrow="Just Landed"
-            title="Latest Products"
-            subtitle="Fresh arrivals dropping daily. Be the first to discover what's new at Zanvara."
-            products={latest}
-          />
-        </div>
-      ) : null}
+      <div className="border-y border-white/[0.05] bg-white/[0.015]">
+        <ProductSlider
+          eyebrow="Just Landed"
+          title="Latest Products"
+          subtitle="Fresh arrivals dropping daily. Be the first to discover what's new at Zanvara."
+          products={latest}
+          loading={loading}
+        />
+      </div>
 
       <PromoBanner />
 
-      {bestDeals.length > 0 ? (
-        <ProductSlider
-          eyebrow="Save Big Today"
-          title="Best Deals"
-          subtitle="Premium products at unbeatable prices — limited stock on top discounted picks."
-          products={bestDeals}
-        />
-      ) : null}
+      <ProductSlider
+        eyebrow="Save Big Today"
+        title="Best Deals"
+        subtitle="Premium products at unbeatable prices — limited stock on top discounted picks."
+        products={bestDeals}
+        loading={loading}
+      />
 
-      <CategorySlider categories={categories} />
+      <CategorySlider categories={categories} loading={loading} />
 
       <ReviewsSection />
     </>

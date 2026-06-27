@@ -7,6 +7,8 @@ import { fetchCategoryNames } from "../../lib/api/categories";
 import { sortOptions } from "../../lib/data/products";
 import ProductCard from "./ProductCard";
 import ProductFilters, { countActiveFilters } from "./ProductFilters";
+import { ProductGridShimmer } from "../ui/LandingShimmers";
+import { PRODUCT_CATALOG_GRID_CLASS } from "../../lib/ui/product-card-layout";
 import Reveal from "../ui/Reveal";
 import Pagination from "../ui/Pagination";
 
@@ -240,14 +242,10 @@ export default function ProductsCatalog() {
         </Reveal>
 
         {loading ? (
-          <Reveal delay={120}>
-            <div className="mt-10 rounded-[1.75rem] border border-white/10 bg-white/[0.02] px-6 py-16 text-center text-sm text-zinc-400">
-              Loading products...
-            </div>
-          </Reveal>
+          <ProductGridShimmer count={9} />
         ) : filteredProducts.length > 0 ? (
           <>
-            <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+            <div className={PRODUCT_CATALOG_GRID_CLASS}>
               {paginatedProducts.map((product, index) => (
                 <Reveal key={product.id} delay={Math.min(index * 40, 240)}>
                   <ProductCard product={product} />

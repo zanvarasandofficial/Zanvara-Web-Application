@@ -44,14 +44,49 @@ export default function OrderCompleteSuccess({ order }) {
                   <span className="text-zinc-500">Payment</span>
                   <span className="text-white">{order.paymentMethod}</span>
                 </div>
+                {order.subtotal != null ? (
+                  <div className="mt-3 flex items-center justify-between gap-4 text-sm">
+                    <span className="text-zinc-500">Subtotal</span>
+                    <span className="text-white">{formatPrice(order.subtotal)}</span>
+                  </div>
+                ) : null}
+                {order.deliveryTotal > 0 ? (
+                  <div className="mt-3 flex items-center justify-between gap-4 text-sm">
+                    <span className="text-zinc-500">Delivery</span>
+                    <span className="text-white">{formatPrice(order.deliveryTotal)}</span>
+                  </div>
+                ) : null}
                 <div className="mt-3 flex items-center justify-between gap-4 text-sm">
                   <span className="text-zinc-500">Total</span>
                   <span className="font-semibold text-white">{formatPrice(order.total)}</span>
                 </div>
-                <div className="mt-3 flex items-center justify-between gap-4 text-sm">
-                  <span className="text-zinc-500">Items</span>
-                  <span className="text-white">{order.items.length}</span>
-                </div>
+
+                {order.items?.length ? (
+                  <div className="mt-5 border-t border-white/[0.08] pt-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">
+                      Items ({order.items.length})
+                    </p>
+                    <ul className="mt-3 space-y-3">
+                      {order.items.map((item) => (
+                        <li
+                          key={item.productId}
+                          className="flex items-start justify-between gap-4 text-sm"
+                        >
+                          <div className="min-w-0">
+                            <p className="font-medium text-white">{item.name}</p>
+                            <p className="mt-0.5 text-zinc-500">Qty {item.quantity}</p>
+                          </div>
+                          <div className="shrink-0 text-right">
+                            <p className="text-zinc-400">{formatPrice(item.price)} each</p>
+                            <p className="mt-0.5 font-semibold text-white">
+                              {formatPrice(item.price * item.quantity)}
+                            </p>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
               </div>
             ) : null}
 

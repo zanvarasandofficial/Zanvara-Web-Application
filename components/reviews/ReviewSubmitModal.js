@@ -6,7 +6,7 @@ import { useCustomerAuth } from "../../context/CustomerAuthContext";
 import { useToast } from "../../context/ToastContext";
 import { getGoogleAuthUrl } from "../../lib/api/customer-auth";
 import {
-  getReviewEligibility,
+  fetchReviewEligibility,
   saveUserReview,
 } from "../../lib/reviews/review-storage";
 import { inputClassName, labelClassName } from "../../lib/ui/formStyles";
@@ -52,8 +52,9 @@ export default function ReviewSubmitModal({
   const [comment, setComment] = useState("");
   const [customerCity, setCustomerCity] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [eligibility, setEligibility] = useState(null);
+  const [eligibilityLoading, setEligibilityLoading] = useState(false);
 
-  const eligibility = productId ? getReviewEligibility(productId) : null;
   const profileName = user?.name?.trim() || "";
 
   useEffect(() => {
@@ -68,8 +69,33 @@ export default function ReviewSubmitModal({
       setCustomerCity("");
       setIsSubmitting(false);
       setAuthOpen(false);
+      setEligibility(null);
+      setEligibilityLoading(false);
     }
   }, [open, productId]);
+
+  useEffect(() => {
+    if (!open || !productId || !isAuthenticated || isLoading) {
+      setEligibility(null);
+      setEligibilityLoading(false);
+      return;
+    }
+
+    let active = true;
+    setEligibilityLoading(true);
+
+    fetchReviewEligibility(productId, user?.id, user?.email)
+      .then((result) => {
+        if (active) setEligibility(result);
+      })
+      .finally(() => {
+        if (active) setEligibilityLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [open, productId, isAuthenticated, isLoading, user?.id, user?.email]);
 
   useEffect(() => {
     if (!open) return;
@@ -117,7 +143,7 @@ export default function ReviewSubmitModal({
         comment: comment.trim(),
       });
 
-      showToast("Review submit ho gayi. Admin approve karne ke baad live hogi.", "success");
+      showToast("Review submit ho gayi aur ab live hai.", "success");
       onSubmitted?.();
       onClose();
     } catch (error) {
@@ -168,8 +194,8 @@ export default function ReviewSubmitModal({
             Apna experience share karein. Name aap ke profile se automatically aay ga.
           </p>
 
-          {isLoading ? (
-            <p className="mt-8 text-sm text-zinc-500">Loading account...</p>
+          {isLoading || eligibilityLoading ? (
+            <p className="mt-8 text-sm text-zinc-500">Checking review eligibility...</p>
           ) : !isAuthenticated ? (
             <div className="mt-8 space-y-4">
               <p className="rounded-2xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-zinc-400">

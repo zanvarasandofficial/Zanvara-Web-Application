@@ -4,12 +4,8 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import StatusBadge from "./StatusBadge";
 import { formatPrice } from "../../lib/data/products";
-import {
-  ORDER_STATUS,
-  formatOrderForAdmin,
-  readOrderHistory,
-  updateOrderStatus,
-} from "../../lib/orders/order-storage";
+import { adminFetch } from "../../lib/api/admin-client";
+import { ORDER_STATUS } from "../../lib/orders/order-storage";
 import { getOrderStatusLabel } from "../../lib/orders/order-status";
 import {
   adminCardClassName,
@@ -26,10 +22,16 @@ export default function AdminOrdersPanel({ compact = false, title = "All orders"
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [search, setSearch] = useState("");
 
-  function loadOrders() {
-    const history = readOrderHistory().map(formatOrderForAdmin);
-    setOrders(history);
-    setStatusMap(Object.fromEntries(history.map((order) => [order.id, order.status])));
+  async function loadOrders() {
+    try {
+      const data = await adminFetch("/admin/orders");
+      const history = Array.isArray(data) ? data : [];
+      setOrders(history);
+      setStatusMap(Object.fromEntries(history.map((order) => [order.id, order.status])));
+    } catch {
+      setOrders([]);
+      setStatusMap({});
+    }
   }
 
   useEffect(() => {
@@ -53,11 +55,19 @@ export default function AdminOrdersPanel({ compact = false, title = "All orders"
 
   const visibleOrders = compact ? filteredOrders.slice(0, 5) : filteredOrders;
 
-  function handleSave(orderId) {
+  async function handleSave(orderId) {
     const nextStatus = statusMap[orderId];
     if (!nextStatus) return;
-    updateOrderStatus(orderId, nextStatus);
-    loadOrders();
+
+    try {
+      await adminFetch(`/admin/orders/${encodeURIComponent(orderId)}/status`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: nextStatus }),
+      });
+      await loadOrders();
+    } catch {
+      // keep existing selection on screen
+    }
   }
 
   return (

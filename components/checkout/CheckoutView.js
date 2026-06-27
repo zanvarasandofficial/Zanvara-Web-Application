@@ -9,15 +9,17 @@ import { useCart } from "../../context/CartContext";
 import { useCustomerAuth } from "../../context/CustomerAuthContext";
 import { formatPrice } from "../../lib/data/products";
 import { saveLastOrder } from "../../lib/cart/storage";
-import { ORDER_STATUS, saveOrderToHistory } from "../../lib/orders/order-storage";
+import { createOrder } from "../../lib/api/orders";
 import { inputClassName, labelClassName } from "../../lib/ui/formStyles";
 import Reveal from "../ui/Reveal";
 import OrderCompleteSuccess from "./OrderCompleteSuccess";
+import { useToast } from "../../context/ToastContext";
 
 export default function CheckoutView() {
   const router = useRouter();
   const { items, subtotal, deliveryTotal, total, clearCart, isReady } = useCart();
   const { user, isLoading: isAuthLoading, isAuthenticated } = useCustomerAuth();
+  const { showToast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [completedOrder, setCompletedOrder] = useState(null);
 
@@ -39,7 +41,7 @@ export default function CheckoutView() {
     return null;
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
     if (!isAuthenticated || !user) {
@@ -49,31 +51,32 @@ export default function CheckoutView() {
     setIsSubmitting(true);
 
     const formData = new FormData(event.currentTarget);
-    const order = {
-      id: `ZV-${Date.now().toString().slice(-8)}`,
-      userId: user.id,
-      items: items.map((item) => ({ ...item })),
-      subtotal,
-      deliveryTotal,
-      total,
-      paymentMethod: "Cash on Delivery",
-      customer: {
-        fullName: String(formData.get("fullName") || user.name || ""),
-        email: String(formData.get("email") || user.email || ""),
-        phone: String(formData.get("phone") || ""),
-        address: String(formData.get("address") || ""),
-        city: String(formData.get("city") || ""),
-        notes: String(formData.get("notes") || ""),
-      },
-      createdAt: new Date().toISOString(),
-      status: ORDER_STATUS.PENDING,
-    };
 
-    saveLastOrder(order);
-    saveOrderToHistory(order);
-    setCompletedOrder(order);
-    clearCart();
-    router.replace(`/checkout/success?order=${order.id}`);
+    try {
+      const order = await createOrder({
+        items: items.map((item) => ({ ...item })),
+        subtotal,
+        deliveryTotal,
+        total,
+        paymentMethod: "Cash on Delivery",
+        customer: {
+          fullName: String(formData.get("fullName") || user.name || ""),
+          email: String(formData.get("email") || user.email || ""),
+          phone: String(formData.get("phone") || ""),
+          address: String(formData.get("address") || ""),
+          city: String(formData.get("city") || ""),
+          notes: String(formData.get("notes") || ""),
+        },
+      });
+
+      saveLastOrder(order);
+      setCompletedOrder(order);
+      clearCart();
+      router.replace(`/checkout/success?order=${order.id}`);
+    } catch (err) {
+      showToast(err.message ?? "Could not place order.", "error");
+      setIsSubmitting(false);
+    }
   }
 
   return (

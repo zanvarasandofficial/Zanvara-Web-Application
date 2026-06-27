@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useCustomerAuth } from "../../context/CustomerAuthContext";
 import {
-  getReviewEligibility,
+  fetchReviewEligibility,
   getReviewsByProductId,
   REVIEWS_CHANGED_EVENT,
 } from "../../lib/reviews/review-storage";
@@ -11,13 +12,19 @@ import StarRating from "../ui/StarRating";
 import ReviewSubmitModal from "../reviews/ReviewSubmitModal";
 
 export default function ProductReviews({ productId, productName }) {
+  const { user } = useCustomerAuth();
   const [reviews, setReviews] = useState([]);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [eligibility, setEligibility] = useState(null);
 
-  function loadReviews() {
+  async function loadReviews() {
     setReviews(getReviewsByProductId(productId));
-    setEligibility(getReviewEligibility(productId));
+    const nextEligibility = await fetchReviewEligibility(
+      productId,
+      user?.id,
+      user?.email,
+    );
+    setEligibility(nextEligibility);
   }
 
   useEffect(() => {
@@ -29,7 +36,7 @@ export default function ProductReviews({ productId, productName }) {
 
     window.addEventListener(REVIEWS_CHANGED_EVENT, handleReviewsChanged);
     return () => window.removeEventListener(REVIEWS_CHANGED_EVENT, handleReviewsChanged);
-  }, [productId]);
+  }, [productId, user?.id, user?.email]);
 
   const average =
     reviews.length > 0
@@ -62,17 +69,23 @@ export default function ProductReviews({ productId, productName }) {
               )}
             </div>
 
-            <button
-              type="button"
-              onClick={() => setReviewModalOpen(true)}
-              className="inline-flex w-fit cursor-pointer items-center justify-center rounded-2xl border border-emerald-500/25 bg-emerald-500/10 px-5 py-3 text-sm font-semibold text-emerald-300 transition hover:border-emerald-500/40 hover:bg-emerald-500/15"
-            >
-              Write a review
-            </button>
+            {eligibility?.state === "already_reviewed" ? (
+              <p className="inline-flex w-fit items-center rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-5 py-3 text-sm font-medium text-emerald-300">
+                Review submitted
+              </p>
+            ) : eligibility?.canReview ? (
+              <button
+                type="button"
+                onClick={() => setReviewModalOpen(true)}
+                className="inline-flex w-fit cursor-pointer items-center justify-center rounded-2xl border border-emerald-500/25 bg-emerald-500/10 px-5 py-3 text-sm font-semibold text-emerald-300 transition hover:border-emerald-500/40 hover:bg-emerald-500/15"
+              >
+                Add review
+              </button>
+            ) : null}
           </div>
         </Reveal>
 
-        {eligibility && !eligibility.canReview && eligibility.state !== "no_purchase" ? (
+        {eligibility && !eligibility.canReview && eligibility.state === "pending" ? (
           <Reveal delay={40}>
             <p className="mt-4 rounded-2xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-zinc-400">
               {eligibility.message}

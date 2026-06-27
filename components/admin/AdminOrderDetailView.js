@@ -7,12 +7,8 @@ import AdminPageHeader from "./AdminPageHeader";
 import OrderTrackingTimeline from "../orders/OrderTrackingTimeline";
 import StatusBadge from "./StatusBadge";
 import { formatPrice } from "../../lib/data/products";
-import {
-  ORDER_STATUS,
-  formatOrderForAdmin,
-  getOrderById,
-  updateOrderStatus,
-} from "../../lib/orders/order-storage";
+import { adminFetch } from "../../lib/api/admin-client";
+import { ORDER_STATUS } from "../../lib/orders/order-storage";
 import { getOrderStatusLabel } from "../../lib/orders/order-status";
 import {
   adminCardClassName,
@@ -28,15 +24,23 @@ export default function AdminOrderDetailView({ orderId }) {
   const [savedMessage, setSavedMessage] = useState("");
 
   useEffect(() => {
-    const rawOrder = getOrderById(orderId);
-    if (!rawOrder) {
-      setOrder(null);
-      return;
+    let cancelled = false;
+
+    async function loadOrder() {
+      try {
+        const data = await adminFetch(`/admin/orders/${encodeURIComponent(orderId)}`);
+        if (cancelled) return;
+        setOrder(data);
+        setStatus(data.status);
+      } catch {
+        if (!cancelled) setOrder(null);
+      }
     }
 
-    const formatted = formatOrderForAdmin(rawOrder);
-    setOrder(formatted);
-    setStatus(formatted.status);
+    loadOrder();
+    return () => {
+      cancelled = true;
+    };
   }, [orderId]);
 
   if (order === null) {
@@ -45,7 +49,7 @@ export default function AdminOrderDetailView({ orderId }) {
         <AdminPageHeader
           eyebrow="Sales"
           title="Order not found"
-          description="This order is not in checkout history for this browser."
+          description="This order could not be found."
           action={
             <Link href="/dashboard/admin/orders" className={adminSecondaryButtonClassName}>
               Back to orders
@@ -54,21 +58,32 @@ export default function AdminOrderDetailView({ orderId }) {
         />
         <section className={`${adminCardClassName} mt-8 p-6`}>
           <p className="text-sm text-slate-600">
-            Place a new order from checkout, or open admin on the same browser where the order
-            was placed.
+            Check the order ID or return to the orders list.
           </p>
         </section>
       </>
     );
   }
 
-  function handleSaveStatus() {
+  async function handleSaveStatus() {
     setIsSaving(true);
-    updateOrderStatus(order.id, status);
-    setOrder(formatOrderForAdmin(getOrderById(order.id)));
-    setSavedMessage("Status updated.");
-    setIsSaving(false);
-    window.setTimeout(() => setSavedMessage(""), 2500);
+    try {
+      const updated = await adminFetch(
+        `/admin/orders/${encodeURIComponent(order.id)}/status`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({ status }),
+        },
+      );
+      setOrder(updated);
+      setStatus(updated.status);
+      setSavedMessage("Status updated.");
+      window.setTimeout(() => setSavedMessage(""), 2500);
+    } catch {
+      setSavedMessage("");
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   return (

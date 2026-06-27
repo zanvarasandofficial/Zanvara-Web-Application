@@ -1,14 +1,17 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import OrderTrackingTimeline from "../orders/OrderTrackingTimeline";
+import { useCustomerAuth } from "../../context/CustomerAuthContext";
+import { fetchMyOrders } from "../../lib/api/orders";
 import { formatPrice } from "../../lib/data/products";
 import {
   getOrderStatusLabel,
   isOrderDelivered,
 } from "../../lib/orders/order-status";
-import { readOrderHistory } from "../../lib/orders/order-storage";
+import { hasUserReviewedProduct } from "../../lib/reviews/review-storage";
 import Reveal from "../ui/Reveal";
 import ReviewSubmitModal from "../reviews/ReviewSubmitModal";
 
@@ -31,29 +34,57 @@ function OrderStatusPill({ status }) {
 }
 
 export default function MyOrdersView() {
+  const router = useRouter();
+  const { isLoading: isAuthLoading, isAuthenticated, user } = useCustomerAuth();
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [reviewTarget, setReviewTarget] = useState(null);
+  const [, setReviewRefresh] = useState(0);
 
   useEffect(() => {
-    function loadOrders() {
-      setOrders(readOrderHistory());
+    if (!isAuthLoading && !isAuthenticated) {
+      router.replace("/checkout");
     }
+  }, [isAuthLoading, isAuthenticated, router]);
 
-    loadOrders();
+  useEffect(() => {
+    if (isAuthLoading || !isAuthenticated) return;
 
-    function handleStorage(event) {
-      if (event.key === "zanvara-orders" || event.key === null) {
-        loadOrders();
+    let active = true;
+
+    async function loadOrders() {
+      setLoading(true);
+      setError("");
+
+      try {
+        const data = await fetchMyOrders();
+        if (active) setOrders(Array.isArray(data) ? data : []);
+      } catch (err) {
+        if (active) {
+          setError(err.message ?? "Could not load orders.");
+          setOrders([]);
+        }
+      } finally {
+        if (active) setLoading(false);
       }
     }
 
-    window.addEventListener("storage", handleStorage);
-    window.addEventListener("zanvara-orders-changed", loadOrders);
+    loadOrders();
     return () => {
-      window.removeEventListener("storage", handleStorage);
-      window.removeEventListener("zanvara-orders-changed", loadOrders);
+      active = false;
     };
-  }, []);
+  }, [isAuthLoading, isAuthenticated]);
+
+  if (isAuthLoading || loading) {
+    return (
+      <div className="pb-16 pt-8 sm:pt-10">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+          <p className="text-sm text-zinc-400">Loading your orders...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -70,6 +101,10 @@ export default function MyOrdersView() {
               <span className="font-medium text-emerald-300">Delivered</span>.
             </p>
           </Reveal>
+
+          {error ? (
+            <p className="mt-6 text-sm text-amber-200">{error}</p>
+          ) : null}
 
           {orders.length === 0 ? (
             <Reveal delay={60}>
@@ -120,23 +155,34 @@ export default function MyOrdersView() {
                               {formatPrice(item.price * item.quantity)}
                             </span>
                             {isOrderDelivered(order.status) ? (
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setReviewTarget({
-                                    productId: item.productId,
-                                    productName: item.name,
-                                  })
-                                }
-                                className="cursor-pointer rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-300 transition hover:border-emerald-500/40 hover:bg-emerald-500/15"
-                              >
-                                Write review
-                              </button>
+                              hasUserReviewedProduct(
+                                item.productId,
+                                user?.id,
+                                user?.email,
+                              ) ? (
+                                <span className="text-xs font-medium text-emerald-300">
+                                  Review submitted
+                                </span>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setReviewTarget({
+                                      productId: item.productId,
+                                      productName: item.name,
+                                    })
+                                  }
+                                  className="cursor-pointer rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-300 transition hover:border-emerald-500/40 hover:bg-emerald-500/15"
+                                >
+                                  Add review
+                                </button>
+                              )
                             ) : (
                               <span className="text-xs text-zinc-500">
-                                Review after delivery
+                                {/* Review after delivery */}
                               </span>
-                            )}
+                            )
+                            }
                           </div>
                         </div>
                       ))}
@@ -154,6 +200,7 @@ export default function MyOrdersView() {
         onClose={() => setReviewTarget(null)}
         productId={reviewTarget?.productId}
         productName={reviewTarget?.productName}
+        onSubmitted={() => setReviewRefresh((tick) => tick + 1)}
       />
     </>
   );

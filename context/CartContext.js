@@ -42,10 +42,7 @@ export function CartProvider({ children }) {
     writeCartToStorage(items);
   }, [items, isReady]);
 
-  const itemCount = useMemo(
-    () => items.reduce((total, item) => total + item.quantity, 0),
-    [items],
-  );
+  const itemCount = useMemo(() => items.length, [items]);
 
   const subtotal = useMemo(
     () => items.reduce((total, item) => total + item.price * item.quantity, 0),

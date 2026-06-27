@@ -129,7 +129,7 @@ export default function ProfileView() {
                   logout();
                   router.push("/");
                 }}
-                className="inline-flex items-center justify-center rounded-2xl border border-rose-500/20 bg-rose-500/10 px-6 py-3.5 text-sm font-semibold text-rose-200 transition-all duration-300 hover:border-rose-500/35"
+                className="inline-flex items-center cursor-pointer justify-center rounded-2xl border border-rose-500/20 bg-rose-500/10 px-6 py-3.5 text-sm font-semibold text-rose-200 transition-all duration-300 hover:border-rose-500/35"
               >
                 Sign out
               </button>
