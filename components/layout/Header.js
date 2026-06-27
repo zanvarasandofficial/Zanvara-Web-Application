@@ -16,6 +16,9 @@ const navLinks = [
   { href: "/contact", label: "Contact" },
 ];
 
+const iconBtnClass =
+  "group relative flex h-11 w-11 items-center justify-center rounded-full border border-[#2A2A2A] bg-[#1A1A1A]/80 text-[#E5E5E5] backdrop-blur-md transition-all duration-300 hover:border-[#FFB347]/40 hover:bg-[#111111] hover:text-[#FFD9A6] hover:shadow-[0_0_24px_rgba(255,179,71,0.2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFB347]/50";
+
 export default function Header() {
   const pathname = usePathname();
   const { itemCount } = useCart();
@@ -39,8 +42,8 @@ export default function Header() {
     <header className="fixed inset-x-0 top-0 z-[100] w-full">
       {!isTransparent ? (
         <>
-          <div className="absolute inset-0 border-b border-white/[0.06] bg-[#050505]/70 backdrop-blur-xl backdrop-saturate-150 transition-all duration-300" />
-          <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-violet-500/30 to-transparent" />
+          <div className="absolute inset-0 border-b border-[#2A2A2A]/80 bg-[#0A0A0A]/55 backdrop-blur-2xl backdrop-saturate-150 transition-all duration-500 supports-[backdrop-filter]:bg-[#0A0A0A]/45" />
+          <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#FFB347]/35 to-transparent" />
         </>
       ) : null}
 
@@ -51,7 +54,7 @@ export default function Header() {
           className="absolute left-1/2 hidden -translate-x-1/2 md:flex"
           aria-label="Main navigation"
         >
-          <ul className="flex items-center gap-2">
+          <ul className="flex items-center gap-1 lg:gap-2">
             {navLinks.map((link) => {
               const isActive =
                 link.href === "/"
@@ -63,19 +66,22 @@ export default function Header() {
                   <Link
                     href={link.href}
                     className={[
-                      "relative rounded-full px-4 py-2 text-sm font-medium transition-all duration-300",
+                      "group relative px-3.5 py-2 text-sm transition-colors duration-300 lg:px-4",
                       isActive
-                        ? "border border-white/[0.08] bg-white/[0.08] text-white shadow-[0_8px_32px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-md"
-                        : "border border-transparent bg-transparent text-zinc-400 hover:text-white",
+                        ? "font-semibold text-[#FFB347]"
+                        : "font-medium text-[#A3A3A3] hover:text-[#E5E5E5]",
                     ].join(" ")}
                   >
                     {link.label}
-                    {isActive ? (
-                      <span
-                        aria-hidden="true"
-                        className="absolute inset-x-3 -bottom-px h-px bg-gradient-to-r from-transparent via-violet-400/80 to-transparent"
-                      />
-                    ) : null}
+                    <span
+                      aria-hidden="true"
+                      className={[
+                        "absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-[#FFB347] transition-all duration-300",
+                        isActive
+                          ? "opacity-100"
+                          : "opacity-0 group-hover:opacity-30",
+                      ].join(" ")}
+                    />
                   </Link>
                 </li>
               );
@@ -84,28 +90,20 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <Link
-            href="/cart"
-            className="group relative flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-black/30 text-zinc-200 backdrop-blur-md transition-all duration-300 hover:border-violet-500/40 hover:bg-white/[0.07] hover:text-white hover:shadow-[0_0_24px_rgba(139,92,246,0.2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
-            aria-label="Open cart"
-          >
+          <Link href="/cart" className={iconBtnClass} aria-label="Open cart">
             <CartIcon className="h-5 w-5 transition-transform duration-300 group-hover:scale-110" />
             {itemCount > 0 ? (
-              <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 px-1 text-[10px] font-semibold text-white shadow-lg shadow-violet-500/30">
+              <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-gradient-to-br from-[#FFB347] to-[#F59E0B] px-1 text-[10px] font-semibold text-[#0A0A0A] shadow-lg shadow-[#FFB347]/30">
                 {itemCount > 99 ? "99+" : itemCount}
               </span>
             ) : null}
           </Link>
 
           {isAuthenticated ? (
-            <Link
-              href="/account/profile"
-              className="group relative flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-black/30 text-zinc-200 backdrop-blur-md transition-all duration-300 hover:border-violet-500/40 hover:text-white hover:shadow-[0_0_24px_rgba(139,92,246,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
-              aria-label="Open profile"
-            >
+            <Link href="/account/profile" className={iconBtnClass} aria-label="Open profile">
               <span
                 aria-hidden="true"
-                className="absolute inset-0 rounded-full bg-gradient-to-br from-violet-500/20 to-cyan-500/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                className="absolute inset-0 rounded-full bg-gradient-to-br from-[#FFB347]/20 to-[#F59E0B]/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
               />
               <UserIcon className="relative h-5 w-5" />
             </Link>

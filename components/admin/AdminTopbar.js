@@ -160,7 +160,7 @@ export default function AdminTopbar({ onOpenSidebar }) {
             ref={buttonRef}
             type="button"
             onClick={() => setNotificationsOpen((open) => !open)}
-            className="relative inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:border-violet-200 hover:text-violet-700"
+            className="relative inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:border-[#FFB347]/30 hover:text-[#F59E0B]"
             aria-label="Notifications"
             aria-expanded={notificationsOpen}
           >
@@ -222,7 +222,7 @@ export default function AdminTopbar({ onOpenSidebar }) {
                       <span
                         className={[
                           "mt-1.5 h-2 w-2 shrink-0 rounded-full",
-                          item.status === "NEW" ? "bg-violet-500" : "bg-transparent",
+                          item.status === "NEW" ? "bg-[#FFB347]" : "bg-transparent",
                         ].join(" ")}
                       />
                       <span className="min-w-0 flex-1">
@@ -245,7 +245,7 @@ export default function AdminTopbar({ onOpenSidebar }) {
                 <Link
                   href="/dashboard/admin/messages"
                   onClick={() => setNotificationsOpen(false)}
-                  className="inline-flex cursor-pointer text-sm font-semibold text-violet-700 transition hover:text-violet-900"
+                  className="inline-flex cursor-pointer text-sm font-semibold text-[#F59E0B] transition hover:text-[#FFB347]"
                 >
                   View all messages
                 </Link>
@@ -255,7 +255,7 @@ export default function AdminTopbar({ onOpenSidebar }) {
         </div>
 
         <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-2 py-1.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-fuchsia-500 text-xs font-bold text-white">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#FFB347] to-[#F59E0B] text-xs font-bold text-[#0A0A0A]">
             {getInitials(user)}
           </div>
           <div className="hidden pr-1 sm:block">

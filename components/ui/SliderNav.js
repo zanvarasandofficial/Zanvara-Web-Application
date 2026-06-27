@@ -14,23 +14,21 @@ export const SliderNavButton = forwardRef(function SliderNavButton(
       type="button"
       aria-label={isPrev ? "Previous slide" : "Next slide"}
       className={[
-        "group relative flex h-12 w-12 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/[0.04] text-zinc-300 transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-500/40 hover:text-white hover:shadow-[0_0_28px_rgba(139,92,246,0.28)] disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0 disabled:hover:shadow-none",
+        "group relative flex h-12 w-12 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-[#2A2A2A] bg-[#1A1A1A] text-[#A3A3A3] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#FFB347]/40 hover:text-[#FFD9A6] hover:shadow-[0_0_28px_rgba(255,179,71,0.22)] disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:translate-y-0 disabled:hover:shadow-none",
         className,
       ].join(" ")}
       {...props}
     >
       <span
         aria-hidden="true"
-        className="absolute inset-0 bg-gradient-to-br from-violet-500/20 to-cyan-500/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-disabled:opacity-0"
+        className="absolute inset-0 bg-gradient-to-br from-[#FFB347]/20 to-[#F59E0B]/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-disabled:opacity-0"
       />
       <svg
         viewBox="0 0 24 24"
         fill="none"
         className={[
           "relative h-5 w-5 transition-transform duration-300",
-          isPrev
-            ? "group-hover:-translate-x-0.5"
-            : "group-hover:translate-x-0.5",
+          isPrev ? "group-hover:-translate-x-0.5" : "group-hover:translate-x-0.5",
         ].join(" ")}
         aria-hidden="true"
       >

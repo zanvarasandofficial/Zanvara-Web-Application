@@ -35,8 +35,8 @@ export default function AdminSettingsPage() {
             className={[
               "rounded-xl px-4 py-2.5 text-sm font-semibold transition",
               activeTab === tab.id
-                ? "bg-violet-600 text-white shadow-md shadow-violet-500/20"
-                : "border border-slate-200 bg-white text-slate-600 hover:border-violet-200 hover:text-violet-700",
+                ? "bg-[#FFB347] text-white shadow-md shadow-[#FFB347]/20"
+                : "border border-slate-200 bg-white text-slate-600 hover:border-[#FFB347]/30 hover:text-[#F59E0B]",
             ].join(" ")}
           >
             {tab.label}
@@ -91,7 +91,7 @@ export default function AdminSettingsPage() {
                 className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3"
               >
                 <span className="text-sm font-medium text-slate-700">{item}</span>
-                <input type="checkbox" defaultChecked className="h-4 w-4 accent-violet-600" />
+                <input type="checkbox" defaultChecked className="h-4 w-4 accent-[#FFB347]" />
               </label>
             ))}
           </div>

@@ -140,8 +140,8 @@ export default function AdminInboundPanel() {
                 className={[
                   "rounded-xl px-3 py-2 text-sm font-medium transition",
                   filter === item.value
-                    ? "bg-violet-600 text-white"
-                    : "border border-slate-200 bg-white text-slate-600 hover:border-violet-200 hover:text-violet-700",
+                    ? "bg-[#FFB347] text-white"
+                    : "border border-slate-200 bg-white text-slate-600 hover:border-[#FFB347]/30 hover:text-[#F59E0B]",
                 ].join(" ")}
               >
                 {item.label}
@@ -216,7 +216,7 @@ export default function AdminInboundPanel() {
                           type="button"
                           disabled={updatingId === item.id}
                           onClick={() => markAsRead(item.id)}
-                          className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-violet-200 hover:text-violet-700 disabled:opacity-50"
+                          className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-[#FFB347]/30 hover:text-[#F59E0B] disabled:opacity-50"
                         >
                           {updatingId === item.id ? "Saving..." : "Mark read"}
                         </button>

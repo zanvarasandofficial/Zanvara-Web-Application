@@ -3,15 +3,18 @@
 import { useState } from "react";
 import { useToast } from "../../context/ToastContext";
 import { submitContactMessage } from "../../lib/api/inbound";
+import { inputClassName, labelClassName, primaryBtnClass } from "../../lib/ui/theme";
 import Reveal from "../ui/Reveal";
 
-const inputClassName =
-  "w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none transition-all duration-300 placeholder:text-zinc-600 focus:border-violet-500/40 focus:bg-black/60 focus:shadow-[0_0_0_4px_rgba(139,92,246,0.12)]";
+const embeddedInputClassName =
+  "w-full rounded-xl border border-[#2A2A2A] bg-[#0A0A0A] px-4 py-3 text-sm text-white outline-none transition-all duration-300 placeholder:text-[#6B6B6B] focus:border-[#FFB347]/40 focus:shadow-[0_0_0_4px_rgba(255,179,71,0.1)]";
 
-export default function ContactForm({ className = "" }) {
+export default function ContactForm({ className = "", embedded = false }) {
   const { showToast } = useToast();
   const [submitted, setSubmitted] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  const fieldClass = embedded ? embeddedInputClassName : inputClassName;
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -37,102 +40,126 @@ export default function ContactForm({ className = "" }) {
     }
   }
 
+  const formBody = submitted ? (
+    <div className="rounded-2xl border border-emerald-500/25 bg-emerald-500/10 px-6 py-10 text-center">
+      <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/15 text-emerald-400">
+        <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7" aria-hidden="true">
+          <path
+            d="M5 12L10 17L19 7"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </span>
+      <p className="mt-5 text-xl font-semibold text-white">Message sent!</p>
+      <p className="mx-auto mt-2 max-w-sm text-sm leading-7 text-[#A3A3A3]">
+        Thank you for reaching out. We will contact you shortly.
+      </p>
+    </div>
+  ) : (
+    <form className="space-y-5" onSubmit={handleSubmit}>
+      <div className="grid gap-5 sm:grid-cols-2">
+        <label className="flex flex-col gap-2">
+          <span className={labelClassName}>First name</span>
+          <input
+            type="text"
+            name="firstName"
+            required
+            placeholder="John"
+            className={fieldClass}
+          />
+        </label>
+        <label className="flex flex-col gap-2">
+          <span className={labelClassName}>Last name</span>
+          <input
+            type="text"
+            name="lastName"
+            required
+            placeholder="Doe"
+            className={fieldClass}
+          />
+        </label>
+      </div>
+
+      <div className="grid gap-5 sm:grid-cols-2">
+        <label className="flex flex-col gap-2">
+          <span className={labelClassName}>Email</span>
+          <input
+            type="email"
+            name="email"
+            required
+            placeholder="you@example.com"
+            className={fieldClass}
+          />
+        </label>
+        <label className="flex flex-col gap-2">
+          <span className={labelClassName}>
+            Phone{" "}
+            <span className="normal-case tracking-normal text-[#6B6B6B]">(optional)</span>
+          </span>
+          <input
+            type="tel"
+            name="phone"
+            placeholder="+92 300 0000000"
+            className={fieldClass}
+          />
+        </label>
+      </div>
+
+      <label className="flex flex-col gap-2">
+        <span className={labelClassName}>Message</span>
+        <textarea
+          name="message"
+          required
+          rows={embedded ? 6 : 7}
+          placeholder="Tell us how we can help..."
+          className={`${fieldClass} resize-none`}
+        />
+      </label>
+
+      <button
+        type="submit"
+        disabled={saving}
+        className={`${primaryBtnClass} w-full rounded-xl py-3.5`}
+      >
+        {saving ? "Sending..." : "Send Message"}
+      </button>
+    </form>
+  );
+
+  if (embedded) {
+    return (
+      <div className={className}>
+        <div className="mb-8 border-b border-[#2A2A2A] pb-8">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#6B6B6B]">
+            Write to us
+          </p>
+          <h2 className="mt-2 text-2xl font-semibold text-white sm:text-[1.65rem]">
+            Send a message
+          </h2>
+          <p className="mt-2 max-w-lg text-sm leading-7 text-[#A3A3A3]">
+            Fill in the form and our team will reply as soon as possible.
+          </p>
+        </div>
+        {formBody}
+      </div>
+    );
+  }
+
   return (
     <Reveal delay={120}>
       <div
-        className={`mx-auto w-full overflow-hidden rounded-[1.75rem] border border-white/[0.08] bg-white/[0.03] p-6 text-center shadow-[0_20px_60px_rgba(0,0,0,0.35)] sm:p-8 ${className}`}
+        className={`w-full overflow-hidden rounded-[1.75rem] border border-[#2A2A2A] bg-[#1A1A1A] p-7 shadow-[0_20px_60px_rgba(0,0,0,0.35)] sm:p-9 lg:p-10 ${className}`}
       >
-        <p className="text-[15px] font-semibold uppercase tracking-[0.22em] text-violet-300">
+        <p className="text-[15px] font-semibold uppercase tracking-[0.22em] text-[#FFD9A6]">
           Send a message
         </p>
-        <p className="mx-auto mt-2 max-w-md text-sm leading-7 text-zinc-400">
+        <p className="mt-2 max-w-xl text-sm leading-7 text-[#A3A3A3]">
           Our team will get back to you as soon as possible.
         </p>
-
-        {submitted ? (
-          <div className="mt-8 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 px-5 py-6 text-center">
-            <p className="text-lg font-semibold text-white">Message sent!</p>
-            <p className="mt-2 text-sm text-zinc-400">
-              Thank you for reaching out. We will contact you shortly.
-            </p>
-          </div>
-        ) : (
-          <form className="mx-auto mt-8 w-full space-y-5 text-left" onSubmit={handleSubmit}>
-            <div className="grid gap-5 sm:grid-cols-2">
-              <label className="flex flex-col gap-2.5">
-                <span className="text-xs font-medium uppercase tracking-[0.16em] text-zinc-500">
-                  First name
-                </span>
-                <input
-                  type="text"
-                  name="firstName"
-                  required
-                  placeholder="John"
-                  className={inputClassName}
-                />
-              </label>
-              <label className="flex flex-col gap-2.5">
-                <span className="text-xs font-medium uppercase tracking-[0.16em] text-zinc-500">
-                  Last name
-                </span>
-                <input
-                  type="text"
-                  name="lastName"
-                  required
-                  placeholder="Doe"
-                  className={inputClassName}
-                />
-              </label>
-            </div>
-
-            <label className="flex flex-col gap-2.5">
-              <span className="text-xs font-medium uppercase tracking-[0.16em] text-zinc-500">
-                Email
-              </span>
-              <input
-                type="email"
-                name="email"
-                required
-                placeholder="you@example.com"
-                className={inputClassName}
-              />
-            </label>
-
-            <label className="flex flex-col gap-2.5">
-              <span className="text-xs font-medium uppercase tracking-[0.16em] text-zinc-500">
-                Phone number{" "}
-                <span className="normal-case tracking-normal text-zinc-600">(optional)</span>
-              </span>
-              <input
-                type="tel"
-                name="phone"
-                placeholder="+92 300 0000000"
-                className={inputClassName}
-              />
-            </label>
-
-            <label className="flex flex-col gap-2.5">
-              <span className="text-xs font-medium uppercase tracking-[0.16em] text-zinc-500">
-                Message
-              </span>
-              <textarea
-                name="message"
-                required
-                rows={5}
-                placeholder="Tell us how we can help..."
-                className={`${inputClassName} resize-none`}
-              />
-            </label>
-
-            <button
-              type="submit"
-              disabled={saving}
-              className="w-full cursor-pointer rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-violet-600 bg-[length:200%_100%] px-4 py-3.5 text-sm font-semibold text-white transition-all duration-500 hover:bg-right hover:shadow-[0_0_32px_rgba(139,92,246,0.35)] disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {saving ? "Sending..." : "Send Message"}
-            </button>
-          </form>
-        )}
+        <div className="mt-8">{formBody}</div>
       </div>
     </Reveal>
   );

@@ -9,10 +9,10 @@ export default function FaqSection() {
   const [openId, setOpenId] = useState(faqItems[0]?.id ?? null);
 
   return (
-    <section className="relative overflow-hidden border-t border-white/[0.06] bg-white/[0.015] py-16 sm:py-20 lg:py-24">
+    <section className="relative overflow-hidden border-t border-[#2A2A2A] bg-[#111111] py-16 sm:py-20 lg:py-24">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-500/25 to-transparent"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#FFB347]/30 to-transparent"
       />
 
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
@@ -35,8 +35,8 @@ export default function FaqSection() {
                   className={[
                     "overflow-hidden rounded-2xl border transition-all duration-300",
                     isOpen
-                      ? "border-violet-500/30 bg-white/[0.05] shadow-[0_0_30px_rgba(139,92,246,0.12)]"
-                      : "border-white/[0.08] bg-white/[0.03] hover:border-white/[0.12]",
+                      ? "border-[#FFB347]/35 bg-[#1A1A1A] shadow-[0_0_30px_rgba(255,179,71,0.1)]"
+                      : "border-[#2A2A2A] bg-[#1A1A1A] hover:border-[#FFB347]/20",
                   ].join(" ")}
                 >
                   <button
@@ -50,10 +50,10 @@ export default function FaqSection() {
                     </span>
                     <span
                       className={[
-                        "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-zinc-300 transition-all duration-300",
+                        "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-all duration-300",
                         isOpen
-                          ? "rotate-180 border-violet-500/30 bg-violet-500/10 text-violet-200"
-                          : "",
+                          ? "rotate-180 border-[#FFB347]/35 bg-[#FFB347]/10 text-[#FFD9A6]"
+                          : "border-[#2A2A2A] bg-[#111111] text-[#A3A3A3]",
                       ].join(" ")}
                       aria-hidden="true"
                     >
@@ -76,7 +76,7 @@ export default function FaqSection() {
                     ].join(" ")}
                   >
                     <div className="overflow-hidden">
-                      <p className="px-5 pb-5 text-sm leading-7 text-zinc-400 sm:px-6 sm:text-base">
+                      <p className="px-5 pb-5 text-sm leading-7 text-[#A3A3A3] sm:px-6 sm:text-base">
                         {item.answer}
                       </p>
                     </div>

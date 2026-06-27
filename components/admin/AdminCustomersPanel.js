@@ -130,7 +130,7 @@ export default function AdminCustomersPanel({
                   className={[
                     "rounded-full px-3 py-1.5 text-xs font-semibold transition",
                     filter === item.value
-                      ? "bg-violet-600 text-white"
+                      ? "bg-[#FFB347] text-white"
                       : "bg-slate-100 text-slate-600 hover:bg-slate-200",
                   ].join(" ")}
                 >
@@ -145,7 +145,7 @@ export default function AdminCustomersPanel({
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Search by name or email..."
-                className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-violet-400 focus:bg-white focus:ring-4 focus:ring-violet-100"
+                className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-[#FFB347] focus:bg-white focus:ring-4 focus:ring-[#FFB347]/20"
               />
             ) : null}
           </div>
@@ -224,7 +224,7 @@ export default function AdminCustomersPanel({
           <div className="border-t border-slate-200 px-6 py-4">
             <a
               href="/dashboard/admin/customers"
-              className="text-sm font-semibold text-violet-600 transition hover:text-violet-700"
+              className="text-sm font-semibold text-[#F59E0B] transition hover:text-[#F59E0B]"
             >
               View all customers
             </a>

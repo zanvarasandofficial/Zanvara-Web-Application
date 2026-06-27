@@ -26,8 +26,8 @@ const contactIcons = [
       </svg>
     ),
     hoverClass:
-      "hover:border-violet-500/35 hover:text-violet-200 hover:shadow-[0_0_20px_rgba(139,92,246,0.22)]",
-    glowClass: "from-violet-500/15 to-fuchsia-500/10",
+      "hover:border-[#FFB347]/35 hover:text-[#FFD9A6] hover:shadow-[0_0_20px_rgba(255,179,71,0.22)]",
+    glowClass: "from-[#FFB347]/15 to-[#F59E0B]/10",
   },
   {
     label: "Instagram",

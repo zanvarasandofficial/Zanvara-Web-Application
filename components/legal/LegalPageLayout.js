@@ -12,7 +12,7 @@ export default function LegalPageLayout({
     <div className="pb-16 pt-10 sm:pt-12 lg:pt-14">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-10">
         <header className="mb-12 border-b border-white/[0.06] pb-10">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-300">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#FFD9A6]">
             {badge}
           </p>
           <h1 className="mt-3 text-4xl font-semibold tracking-tight text-white sm:text-5xl">
@@ -52,7 +52,7 @@ export default function LegalPageLayout({
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="text-zinc-300 underline decoration-zinc-600 underline-offset-4 transition-colors hover:text-white hover:decoration-violet-400"
+                  className="text-zinc-300 underline decoration-zinc-600 underline-offset-4 transition-colors hover:text-white hover:decoration-[#FFB347]"
                 >
                   {link.label}
                 </Link>

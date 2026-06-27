@@ -454,7 +454,7 @@ export default function ProductForm({
                     {formatPrice(Number(form.priceAfterDiscount))}
                   </span>{" "}
                   with{" "}
-                  <span className="font-semibold text-violet-700">-{discountPercent}%</span>{" "}
+                  <span className="font-semibold text-[#F59E0B]">-{discountPercent}%</span>{" "}
                   off from {formatPrice(Number(form.originalPrice))}.
                 </>
               ) : (
@@ -640,7 +640,7 @@ export default function ProductForm({
                   type="checkbox"
                   checked={form.isPopular}
                   onChange={(event) => updateField("isPopular", event.target.checked)}
-                  className="h-4 w-4 accent-violet-600"
+                  className="h-4 w-4 accent-[#FFB347]"
                 />
               </label>
 

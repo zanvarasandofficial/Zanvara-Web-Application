@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import HeroSection from "../sections/HeroSection";
+import LandingPerks from "../sections/LandingPerks";
 import ProductSlider from "../sections/ProductSlider";
 import CategorySlider from "../sections/CategorySlider";
 import ReviewsSection from "../sections/ReviewsSection";
@@ -73,12 +74,14 @@ export default function LandingPageContent() {
   return (
     <>
       {loadError ? (
-        <div className="border-b border-amber-500/20 bg-amber-500/10 px-4 py-3 text-center text-sm text-amber-100">
+        <div className="border-b border-[#FFB347]/20 bg-[#FFB347]/10 px-4 py-3 text-center text-sm text-[#FFD9A6]">
           {loadError}
         </div>
       ) : null}
 
       <HeroSection hero={hero} />
+
+      <LandingPerks />
 
       <ProductSlider
         eyebrow="Customer Favorites"
@@ -88,7 +91,7 @@ export default function LandingPageContent() {
         loading={loading}
       />
 
-      <div className="border-y border-white/[0.05] bg-white/[0.015]">
+      <div className="border-y border-[#2A2A2A] bg-[#111111]">
         <ProductSlider
           eyebrow="Just Landed"
           title="Latest Products"

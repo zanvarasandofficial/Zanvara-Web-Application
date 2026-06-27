@@ -23,7 +23,7 @@ export default function Pagination({
         onClick={() => onPageChange(currentPage - 1)}
         disabled={!canGoPrev}
         aria-label="Previous page"
-        className="inline-flex h-11 min-w-11 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-white/[0.04] px-4 text-sm font-medium text-zinc-300 transition-all duration-300 hover:border-violet-500/35 hover:text-white disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:border-white/10 disabled:hover:text-zinc-300"
+        className="inline-flex h-11 min-w-11 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-white/[0.04] px-4 text-sm font-medium text-zinc-300 transition-all duration-300 hover:border-[#FFB347]/35 hover:text-white disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:border-white/10 disabled:hover:text-zinc-300"
       >
         <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 sm:mr-1" aria-hidden="true">
           <path
@@ -52,8 +52,8 @@ export default function Pagination({
               className={[
                 "flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border text-sm font-semibold transition-all duration-300",
                 isActive
-                  ? "border-violet-500/40 bg-violet-500/15 text-white shadow-[0_0_20px_rgba(139,92,246,0.2)]"
-                  : "border-white/10 bg-white/[0.04] text-zinc-400 hover:border-violet-500/30 hover:text-white",
+                  ? "border-[#FFB347]/40 bg-[#FFB347]/15 text-white shadow-[0_0_20px_rgba(255,179,71,0.2)]"
+                  : "border-white/10 bg-white/[0.04] text-zinc-400 hover:border-[#FFB347]/30 hover:text-white",
               ].join(" ")}
             >
               {page}
@@ -67,7 +67,7 @@ export default function Pagination({
         onClick={() => onPageChange(currentPage + 1)}
         disabled={!canGoNext}
         aria-label="Next page"
-        className="inline-flex h-11 min-w-11 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-white/[0.04] px-4 text-sm font-medium text-zinc-300 transition-all duration-300 hover:border-violet-500/35 hover:text-white disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:border-white/10 disabled:hover:text-zinc-300"
+        className="inline-flex h-11 min-w-11 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-white/[0.04] px-4 text-sm font-medium text-zinc-300 transition-all duration-300 hover:border-[#FFB347]/35 hover:text-white disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:border-white/10 disabled:hover:text-zinc-300"
       >
         <span className="hidden sm:inline">Next</span>
         <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 sm:ml-1" aria-hidden="true">

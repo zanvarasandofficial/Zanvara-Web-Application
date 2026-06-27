@@ -29,10 +29,10 @@ export default function HeroMediaBackground({ mediaType = "video", mediaUrl = ""
     return (
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 overflow-hidden bg-[#050505]"
+        className="pointer-events-none absolute inset-0 overflow-hidden bg-[#0A0A0A]"
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-violet-950/40 via-[#050505] to-fuchsia-950/30" />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#050505]/10 to-[#050505]/80" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#111111] via-[#0A0A0A] to-[#1A1A1A]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0A0A0A]/10 to-[#0A0A0A]/85" />
       </div>
     );
   }
@@ -63,9 +63,9 @@ export default function HeroMediaBackground({ mediaType = "video", mediaUrl = ""
         />
       )}
 
-      <div className="absolute inset-0 bg-[#050505]/25" />
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#050505]/10 to-[#050505]/80" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(5,5,5,0.35)_100%)]" />
+      <div className="absolute inset-0 bg-[#0A0A0A]/35" />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0A0A0A]/15 to-[#0A0A0A]/85" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(10,10,10,0.45)_100%)]" />
     </div>
   );
 }

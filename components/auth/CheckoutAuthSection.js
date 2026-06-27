@@ -54,7 +54,7 @@ export default function CheckoutAuthSection({ onAuthenticated }) {
           <button
             type="button"
             onClick={() => setEmailModalOpen(true)}
-            className="inline-flex cursor-pointer items-center justify-center rounded-2xl border border-white/10 bg-black/30 px-5 py-3.5 text-sm font-semibold text-white transition-all duration-300 hover:border-violet-500/35 hover:bg-white/[0.06]"
+            className="inline-flex cursor-pointer items-center justify-center rounded-2xl border border-white/10 bg-black/30 px-5 py-3.5 text-sm font-semibold text-white transition-all duration-300 hover:border-[#FFB347]/35 hover:bg-white/[0.06]"
           >
             Continue with Email
           </button>

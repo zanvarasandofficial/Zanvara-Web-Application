@@ -10,7 +10,7 @@ const toneStyles = {
   danger: "bg-rose-50 text-rose-700 ring-rose-200",
   info: "bg-sky-50 text-sky-700 ring-sky-200",
   neutral: "bg-slate-100 text-slate-600 ring-slate-200",
-  violet: "bg-violet-50 text-violet-700 ring-violet-200",
+  violet: "bg-[#FFB347]/10 text-[#F59E0B] ring-[#FFB347]/30",
 };
 
 const statusToneMap = {

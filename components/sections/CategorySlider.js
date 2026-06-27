@@ -30,10 +30,10 @@ export default function CategorySlider({
   const showSlider = !loading && hasCategories;
 
   return (
-    <section className="relative overflow-hidden py-14 sm:py-16 lg:py-20">
+    <section className="relative overflow-hidden bg-[#111111] py-14 sm:py-16 lg:py-20">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-gradient-to-r from-transparent via-white/[0.06] to-transparent"
+        className="pointer-events-none absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-gradient-to-r from-transparent via-[#FFB347]/15 to-transparent"
       />
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -50,7 +50,7 @@ export default function CategorySlider({
           {loading ? <CategorySliderShimmer /> : null}
 
           {!loading && !hasCategories ? (
-            <p className="py-8 text-center text-sm text-zinc-500">{emptyMessage}</p>
+            <p className="py-8 text-center text-sm text-[#6B6B6B]">{emptyMessage}</p>
           ) : null}
 
           {showSlider ? (
@@ -75,7 +75,7 @@ export default function CategorySlider({
                   <SwiperSlide key={category.id}>
                     <Link
                       href={`/products?category=${encodeURIComponent(category.name)}`}
-                      className="group relative block overflow-hidden rounded-3xl border border-white/[0.08] bg-white/[0.03] shadow-[0_20px_50px_rgba(0,0,0,0.35)] transition-all duration-500 hover:border-violet-500/25"
+                      className="group relative block overflow-hidden rounded-3xl border border-[#2A2A2A] bg-[#1A1A1A] shadow-[0_20px_50px_rgba(0,0,0,0.35)] transition-all duration-500 hover:border-[#FFB347]/35"
                     >
                       <div className={`relative ${PRODUCT_CARD_IMAGE_ASPECT} overflow-hidden`}>
                         <Image
@@ -88,8 +88,8 @@ export default function CategorySlider({
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                         <div className="absolute inset-x-0 bottom-0 p-5">
                           <p className="text-xl font-semibold text-white">{category.name}</p>
-                          <p className="mt-1 text-sm text-zinc-400">{category.count}</p>
-                          <span className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-violet-300 transition-transform duration-300 group-hover:translate-x-1">
+                          <p className="mt-1 text-sm text-[#A3A3A3]">{category.count}</p>
+                          <span className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-[#FFB347] transition-transform duration-300 group-hover:translate-x-1">
                             Explore
                             <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
                               <path

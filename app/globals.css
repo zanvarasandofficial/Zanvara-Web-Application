@@ -1,18 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --background: #050505;
-  --foreground: #fafafa;
-  --muted: #a1a1aa;
-  --muted-foreground: #71717a;
-  --surface: #0f0f12;
-  --surface-elevated: #16161a;
-  --border: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.14);
-  --accent: #a78bfa;
-  --accent-strong: #8b5cf6;
-  --accent-glow: rgba(139, 92, 246, 0.35);
-  --ring: rgba(167, 139, 250, 0.45);
+  --background: #0a0a0a;
+  --foreground: #ffffff;
+  --muted: #a3a3a3;
+  --muted-foreground: #6b6b6b;
+  --surface: #111111;
+  --surface-elevated: #1a1a1a;
+  --border: #2a2a2a;
+  --border-strong: rgba(255, 179, 71, 0.35);
+  --accent: #ffb347;
+  --accent-strong: #f59e0b;
+  --accent-glow: rgba(255, 179, 71, 0.35);
+  --ring: rgba(255, 179, 71, 0.45);
 }
 
 @theme inline {
@@ -48,20 +48,20 @@ body {
   background-image:
     radial-gradient(
       ellipse 80% 50% at 50% -20%,
-      rgba(139, 92, 246, 0.15),
+      rgba(255, 179, 71, 0.12),
       transparent
     ),
     radial-gradient(
-      ellipse 60% 40% at 100% 0%,
-      rgba(6, 182, 212, 0.08),
+      ellipse 50% 40% at 100% 0%,
+      rgba(245, 158, 11, 0.08),
       transparent
     );
   background-attachment: fixed;
 }
 
 ::selection {
-  background: rgba(139, 92, 246, 0.35);
-  color: #fff;
+  background: rgba(255, 179, 71, 0.35);
+  color: #0a0a0a;
 }
 
 @keyframes footer-glow {
@@ -191,20 +191,20 @@ body {
 
 .product-details-content blockquote {
   margin-top: 0.75rem;
-  border-left: 3px solid #7c3aed;
+  border-left: 3px solid #ffb347;
   padding-left: 1rem;
-  color: #a1a1aa;
+  color: #a3a3a3;
   font-style: italic;
 }
 
 .product-details-content a {
-  color: #a78bfa;
+  color: #ffb347;
   text-decoration: underline;
   text-underline-offset: 2px;
 }
 
 .product-details-content a:hover {
-  color: #c4b5fd;
+  color: #ffd9a6;
 }
 
 .rich-text-editor img.rich-text-image,
@@ -240,9 +240,6 @@ body {
 
 /* Handle */
 .Custom__scrollbar::-webkit-scrollbar-thumb {
-  background: #8b5cf6;
+  background: #ffb347;
   border-radius: 10px;
 }
-
-
-/* hello world */

@@ -18,7 +18,7 @@ import ReviewSubmitModal from "../reviews/ReviewSubmitModal";
 const statusStyles = {
   pending: "border-amber-500/20 bg-amber-500/10 text-amber-300",
   confirmed: "border-sky-500/20 bg-sky-500/10 text-sky-300",
-  shipped: "border-violet-500/20 bg-violet-500/10 text-violet-300",
+  shipped: "border-[#FFB347]/25 bg-[#FFB347]/10 text-[#FFD9A6]",
   delivered: "border-emerald-500/20 bg-emerald-500/10 text-emerald-300",
   cancelled: "border-rose-500/20 bg-rose-500/10 text-rose-300",
 };
@@ -91,7 +91,7 @@ export default function MyOrdersView() {
       <div className="pb-16 pt-8 sm:pt-10">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
           <Reveal>
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-300">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#FFD9A6]">
               My Orders
             </p>
             <h1 className="mt-3 text-4xl font-semibold text-white">Order history</h1>
@@ -115,7 +115,7 @@ export default function MyOrdersView() {
                 </p>
                 <Link
                   href="/products"
-                  className="mt-6 inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-violet-600 px-6 py-3.5 text-sm font-semibold text-white"
+                  className="mt-6 inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-[#FFB347] to-[#F59E0B] px-6 py-3.5 text-sm font-semibold text-[#0A0A0A]"
                 >
                   Shop Products
                 </Link>

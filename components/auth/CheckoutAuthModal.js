@@ -131,7 +131,7 @@ export default function CheckoutAuthModal({ open, onClose, onSuccess }) {
           Close
         </button>
 
-        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-300">
+        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#FFD9A6]">
           Sign in to checkout
         </p>
         <h2 id="checkout-auth-title" className="mt-3 text-2xl font-semibold text-white">
@@ -170,7 +170,7 @@ export default function CheckoutAuthModal({ open, onClose, onSuccess }) {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="inline-flex w-full cursor-pointer items-center justify-center rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-violet-600 px-6 py-3.5 text-sm font-semibold text-white transition-all duration-300 hover:shadow-[0_0_32px_rgba(139,92,246,0.35)] disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex w-full cursor-pointer items-center justify-center rounded-2xl bg-gradient-to-r from-[#FFB347] to-[#F59E0B] px-6 py-3.5 text-sm font-semibold text-[#0A0A0A] transition-all duration-300 hover:shadow-[0_0_32px_rgba(255,179,71,0.35)] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isSubmitting ? "Sending code..." : "Send verification code"}
             </button>
@@ -199,7 +199,7 @@ export default function CheckoutAuthModal({ open, onClose, onSuccess }) {
             <button
               type="submit"
               disabled={isSubmitting || code.length !== 6}
-              className="inline-flex w-full cursor-pointer items-center justify-center rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-violet-600 px-6 py-3.5 text-sm font-semibold text-white transition-all duration-300 hover:shadow-[0_0_32px_rgba(139,92,246,0.35)] disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex w-full cursor-pointer items-center justify-center rounded-2xl bg-gradient-to-r from-[#FFB347] to-[#F59E0B] px-6 py-3.5 text-sm font-semibold text-[#0A0A0A] transition-all duration-300 hover:shadow-[0_0_32px_rgba(255,179,71,0.35)] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isSubmitting ? "Verifying..." : "Verify and continue"}
             </button>
@@ -207,7 +207,7 @@ export default function CheckoutAuthModal({ open, onClose, onSuccess }) {
             <button
               type="button"
               onClick={() => setStep("email")}
-              className="inline-flex w-full items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] px-6 py-3 text-sm font-semibold text-white transition-all duration-300 hover:border-violet-500/35 hover:bg-white/[0.06]"
+              className="inline-flex w-full items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] px-6 py-3 text-sm font-semibold text-white transition-all duration-300 hover:border-[#FFB347]/35 hover:bg-white/[0.06]"
             >
               Change email
             </button>

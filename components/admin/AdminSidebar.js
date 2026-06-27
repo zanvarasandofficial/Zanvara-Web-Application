@@ -108,7 +108,7 @@ export default function AdminSidebar({ mobileOpen, onClose }) {
   const navContent = (
     <>
       <div className="flex h-16 items-center gap-3 border-b border-slate-200 px-5">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-fuchsia-500 text-sm font-bold text-white shadow-lg shadow-violet-500/20">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#FFB347] to-[#F59E0B] text-sm font-bold text-[#0A0A0A] shadow-lg shadow-[#FFB347]/20">
           Z
         </div>
         <div>
@@ -129,7 +129,7 @@ export default function AdminSidebar({ mobileOpen, onClose }) {
               className={[
                 "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
                 active
-                  ? "bg-violet-600 text-white shadow-md shadow-violet-500/20"
+                  ? "bg-[#FFB347] text-white shadow-md shadow-[#FFB347]/20"
                   : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
               ].join(" ")}
             >
@@ -143,7 +143,7 @@ export default function AdminSidebar({ mobileOpen, onClose }) {
       <div className="border-t border-slate-200 p-4">
         <Link
           href="/"
-          className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:border-violet-200 hover:bg-violet-50 hover:text-violet-700"
+          className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:border-[#FFB347]/30 hover:bg-[#FFB347]/10 hover:text-[#F59E0B]"
         >
           <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
             <path d="M10 6H6C4.89543 6 4 6.89543 4 8V18C4 19.1046 4.89543 20 6 20H18C19.1046 20 20 19.1046 20 18V14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
@@ -184,7 +184,7 @@ export function AdminSidebarToggle({ onOpen }) {
     <button
       type="button"
       onClick={onOpen}
-      className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 transition hover:border-violet-200 hover:text-violet-700 lg:hidden"
+      className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 transition hover:border-[#FFB347]/30 hover:text-[#F59E0B] lg:hidden"
       aria-label="Open menu"
     >
       <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">

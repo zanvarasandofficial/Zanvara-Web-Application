@@ -17,7 +17,7 @@ export default function CartView() {
       <div className="pb-16 pt-8 sm:pt-10">
         <div className="mx-auto max-w-3xl px-4 text-center sm:px-6">
           <Reveal>
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-300">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#FFD9A6]">
               Your Cart
             </p>
             <h1 className="mt-3 text-4xl font-semibold text-white">Cart is empty</h1>
@@ -26,7 +26,7 @@ export default function CartView() {
             </p>
             <Link
               href="/products"
-              className="mt-8 inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-violet-600 px-6 py-3.5 text-sm font-semibold text-white transition-all duration-300 hover:shadow-[0_0_32px_rgba(139,92,246,0.35)]"
+              className="mt-8 inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-[#FFB347] to-[#F59E0B] px-6 py-3.5 text-sm font-semibold text-[#0A0A0A] transition-all duration-300 hover:shadow-[0_0_32px_rgba(255,179,71,0.35)]"
             >
               Shop All Products
             </Link>
@@ -40,7 +40,7 @@ export default function CartView() {
     <div className="pb-16 pt-8 sm:pt-10">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Reveal>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-300">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#FFD9A6]">
             Your Cart
           </p>
           <h1 className="mt-3 text-4xl font-semibold text-white">Shopping Cart</h1>
@@ -76,7 +76,7 @@ export default function CartView() {
                       <div>
                         <Link
                           href={`/products/${item.productId}`}
-                          className="text-lg font-semibold text-white transition-colors hover:text-violet-200"
+                          className="text-lg font-semibold text-white transition-colors hover:text-[#FFD9A6]"
                         >
                           {item.name}
                         </Link>
@@ -188,14 +188,14 @@ export default function CartView() {
 
               <Link
                 href="/checkout"
-                className="mt-6 inline-flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-violet-600 px-6 py-3.5 text-sm font-semibold text-white transition-all duration-300 hover:shadow-[0_0_32px_rgba(139,92,246,0.35)]"
+                className="mt-6 inline-flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-[#FFB347] to-[#F59E0B] px-6 py-3.5 text-sm font-semibold text-[#0A0A0A] transition-all duration-300 hover:shadow-[0_0_32px_rgba(255,179,71,0.35)]"
               >
                 Proceed to Checkout
               </Link>
 
               <Link
                 href="/products"
-                className="mt-3 inline-flex w-full items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] px-6 py-3.5 text-sm font-semibold text-white transition-all duration-300 hover:border-violet-500/35 hover:bg-white/[0.06]"
+                className="mt-3 inline-flex w-full items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] px-6 py-3.5 text-sm font-semibold text-white transition-all duration-300 hover:border-[#FFB347]/35 hover:bg-white/[0.06]"
               >
                 Continue Shopping
               </Link>

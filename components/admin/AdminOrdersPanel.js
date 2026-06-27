@@ -99,7 +99,7 @@ export default function AdminOrdersPanel({ compact = false, title = "All orders"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search orders..."
-              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-violet-400 focus:bg-white focus:ring-4 focus:ring-violet-100"
+              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-[#FFB347] focus:bg-white focus:ring-4 focus:ring-[#FFB347]/20"
             />
           </div>
         ) : null}
@@ -196,7 +196,7 @@ export default function AdminOrdersPanel({ compact = false, title = "All orders"
         <div className="border-t border-slate-200 px-6 py-4">
           <Link
             href="/dashboard/admin/orders"
-            className="text-sm font-semibold text-violet-600 transition hover:text-violet-700"
+            className="text-sm font-semibold text-[#F59E0B] transition hover:text-[#F59E0B]"
           >
             View all orders
           </Link>

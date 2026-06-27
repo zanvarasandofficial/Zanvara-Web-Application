@@ -31,7 +31,7 @@ export default function ProductSlider({
 
   return (
     <section
-      className={["relative overflow-hidden py-14 sm:py-16 lg:py-20", className].join(" ")}
+      className={["relative overflow-hidden py-14 sm:py-16 lg:py-20 bg-[#0A0A0A]", className].join(" ")}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Reveal>

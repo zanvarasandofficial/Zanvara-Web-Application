@@ -101,8 +101,8 @@ export default function ProductImageZoom({ src, alt, hoverImage, galleryImages =
                 className={[
                   "relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border transition-all duration-200",
                   isActive
-                    ? "border-violet-500 ring-2 ring-violet-500/40"
-                    : "border-white/10 opacity-75 hover:border-violet-500/35 hover:opacity-100",
+                    ? "border-[#FFB347] ring-2 ring-[#FFB347]/40"
+                    : "border-white/10 opacity-75 hover:border-[#FFB347]/35 hover:opacity-100",
                 ].join(" ")}
               >
                 <Image

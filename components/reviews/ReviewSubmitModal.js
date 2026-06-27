@@ -184,7 +184,7 @@ export default function ReviewSubmitModal({
             Close
           </button>
 
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-300">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#FFD9A6]">
             Product review
           </p>
           <h2 id="review-submit-title" className="mt-3 text-2xl font-semibold text-white">
@@ -204,13 +204,13 @@ export default function ReviewSubmitModal({
               <button
                 type="button"
                 onClick={() => setAuthOpen(true)}
-                className="inline-flex w-full cursor-pointer items-center justify-center rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-violet-600 px-6 py-3.5 text-sm font-semibold text-white"
+                className="inline-flex w-full cursor-pointer items-center justify-center rounded-2xl bg-gradient-to-r from-[#FFB347] to-[#F59E0B] px-6 py-3.5 text-sm font-semibold text-[#0A0A0A]"
               >
                 Sign in with email
               </button>
               <a
                 href={getGoogleAuthUrl(typeof window !== "undefined" ? window.location.pathname : "/")}
-                className="inline-flex w-full items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] px-6 py-3.5 text-sm font-semibold text-white transition hover:border-violet-500/35 hover:bg-white/[0.06]"
+                className="inline-flex w-full items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] px-6 py-3.5 text-sm font-semibold text-white transition hover:border-[#FFB347]/35 hover:bg-white/[0.06]"
               >
                 Continue with Google
               </a>
@@ -226,7 +226,7 @@ export default function ReviewSubmitModal({
               </p>
               <a
                 href="/account/profile"
-                className="inline-flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-violet-600 px-6 py-3.5 text-sm font-semibold text-white"
+                className="inline-flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-[#FFB347] to-[#F59E0B] px-6 py-3.5 text-sm font-semibold text-[#0A0A0A]"
               >
                 Go to profile
               </a>
@@ -287,7 +287,7 @@ export default function ReviewSubmitModal({
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="inline-flex w-full cursor-pointer items-center justify-center rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-violet-600 px-6 py-3.5 text-sm font-semibold text-white transition-all duration-300 hover:shadow-[0_0_32px_rgba(139,92,246,0.35)] disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex w-full cursor-pointer items-center justify-center rounded-2xl bg-gradient-to-r from-[#FFB347] to-[#F59E0B] px-6 py-3.5 text-sm font-semibold text-[#0A0A0A] transition-all duration-300 hover:shadow-[0_0_32px_rgba(255,179,71,0.35)] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSubmitting ? "Submitting..." : "Submit review"}
               </button>

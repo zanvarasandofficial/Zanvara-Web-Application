@@ -10,13 +10,13 @@ import {
 } from "../../lib/rich-text/utils";
 
 const toolbarButtonClassName =
-  "inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-slate-200 bg-white px-2.5 text-sm font-semibold text-slate-700 transition hover:border-violet-200 hover:bg-violet-50 hover:text-violet-700 disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-slate-200 bg-white px-2.5 text-sm font-semibold text-slate-700 transition hover:border-[#FFB347]/30 hover:bg-[#FFB347]/10 hover:text-[#F59E0B] disabled:cursor-not-allowed disabled:opacity-60";
 
 const sizeInputClassName =
-  "w-24 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-800 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100";
+  "w-24 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-800 outline-none focus:border-[#FFB347] focus:ring-2 focus:ring-[#FFB347]/20";
 
 const selectClassName =
-  "min-w-[220px] rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-800 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100";
+  "min-w-[220px] rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-800 outline-none focus:border-[#FFB347] focus:ring-2 focus:ring-[#FFB347]/20";
 
 const colorOptions = [
   { label: "Default", value: "#0f172a" },
@@ -390,7 +390,7 @@ export default function RichTextEditor({ value = "", onChange, placeholder }) {
       </div>
 
       {editorImages.length > 0 ? (
-        <div className="space-y-3 border-b border-slate-200 bg-violet-50/60 px-3 py-3">
+        <div className="space-y-3 border-b border-slate-200 bg-[#FFB347]/10/60 px-3 py-3">
           <div className="flex flex-wrap items-center gap-2">
             <label className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
               Select image

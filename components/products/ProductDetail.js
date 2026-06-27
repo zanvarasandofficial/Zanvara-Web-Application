@@ -79,7 +79,7 @@ export default function ProductDetail({ product }) {
           <Reveal delay={80}>
             <div className="flex h-full flex-col">
               {badgeLabel ? (
-                <span className="mb-4 inline-flex w-fit rounded-full border border-violet-500/20 bg-violet-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-violet-300">
+                <span className="mb-4 inline-flex w-fit rounded-full border border-[#FFB347]/25 bg-[#FFB347]/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#FFD9A6]">
                   {badgeLabel}
                 </span>
               ) : null}
@@ -97,7 +97,7 @@ export default function ProductDetail({ product }) {
                     <span className="pb-1 text-lg text-zinc-500 line-through">
                       {formatPrice(product.originalPrice)}
                     </span>
-                    <span className="rounded-full bg-gradient-to-r from-fuchsia-600 to-violet-600 px-2.5 py-1 text-xs font-bold text-white">
+                    <span className="rounded-full bg-gradient-to-r from-[#FFB347] to-[#F59E0B] px-2.5 py-1 text-xs font-bold text-[#0A0A0A]">
                       -{discountPercent}%
                     </span>
                   </>
@@ -180,7 +180,7 @@ export default function ProductDetail({ product }) {
                       type="button"
                       onClick={handleAddToCart}
                       disabled={!inStock}
-                      className="inline-flex min-w-[220px] flex-1 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-violet-600 px-6 py-3.5 text-sm font-semibold text-white transition-all duration-300 hover:shadow-[0_0_32px_rgba(139,92,246,0.35)] disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none"
+                      className="inline-flex min-w-[220px] flex-1 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#FFB347] to-[#F59E0B] px-6 py-3.5 text-sm font-semibold text-[#0A0A0A] transition-all duration-300 hover:shadow-[0_0_32px_rgba(255,179,71,0.35)] disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none"
                     >
                       Add to Cart
                     </button>

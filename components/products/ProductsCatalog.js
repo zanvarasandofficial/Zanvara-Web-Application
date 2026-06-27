@@ -201,7 +201,7 @@ export default function ProductsCatalog() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Reveal>
           <div className="mb-6">
-            <p className="mb-3 inline-flex items-center rounded-full border border-violet-500/20 bg-violet-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-violet-300">
+            <p className="mb-3 inline-flex items-center rounded-full border border-[#FFB347]/25 bg-[#FFB347]/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#FFD9A6]">
               Zanvara Store
             </p>
             <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">
@@ -275,7 +275,7 @@ export default function ProductsCatalog() {
                 <button
                   type="button"
                   onClick={resetFilters}
-                  className="mt-6 cursor-pointer rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-violet-600 px-5 py-3 text-sm font-semibold text-white transition-all duration-300 hover:shadow-[0_0_28px_rgba(139,92,246,0.28)]"
+                  className="mt-6 cursor-pointer rounded-2xl bg-gradient-to-r from-[#FFB347] to-[#F59E0B] px-5 py-3 text-sm font-semibold text-[#0A0A0A] transition-all duration-300 hover:shadow-[0_0_28px_rgba(255,179,71,0.28)]"
                 >
                   Clear all filters
                 </button>

@@ -42,14 +42,14 @@ export default function ReviewsSection({
   const showSlider = !loading && hasReviews;
 
   return (
-    <section className="relative overflow-hidden border-t border-white/[0.06] py-16 sm:py-20 lg:py-24">
+    <section className="relative overflow-hidden border-t border-[#2A2A2A] bg-[#0A0A0A] py-16 sm:py-20 lg:py-24">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-500/25 to-transparent"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#FFB347]/30 to-transparent"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -left-24 top-20 h-72 w-72 rounded-full bg-violet-500/10 blur-3xl"
+        className="pointer-events-none absolute -left-24 top-20 h-72 w-72 rounded-full bg-[#FFB347]/10 blur-3xl"
       />
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -66,7 +66,7 @@ export default function ReviewsSection({
           {loading ? <ReviewsSliderShimmer /> : null}
 
           {!loading && !hasReviews ? (
-            <p className="py-8 text-center text-sm text-zinc-500">{emptyMessage}</p>
+            <p className="py-8 text-center text-sm text-[#6B6B6B]">{emptyMessage}</p>
           ) : null}
 
           {showSlider ? (
@@ -92,24 +92,24 @@ export default function ReviewsSection({
               >
                 {reviews.map((review) => (
                   <SwiperSlide key={review.id} className="h-auto">
-                    <article className="flex h-full flex-col rounded-[1.75rem] border border-white/[0.08] bg-white/[0.03] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.35)]">
+                    <article className="flex h-full flex-col rounded-[1.75rem] border border-[#2A2A2A] bg-[#1A1A1A] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.35)]">
                       <div className="flex items-start justify-between gap-3">
                         <StarRating rating={review.rating} />
                         {review.verified ? (
-                          <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-emerald-300">
+                          <span className="rounded-full border border-[#FFB347]/25 bg-[#FFB347]/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#FFD9A6]">
                             Verified
                           </span>
                         ) : null}
                       </div>
 
                       <h3 className="mt-4 text-lg font-semibold text-white">{review.title}</h3>
-                      <p className="mt-3 flex-1 text-sm leading-7 text-zinc-400">
+                      <p className="mt-3 flex-1 text-sm leading-7 text-[#A3A3A3]">
                         &ldquo;{review.comment}&rdquo;
                       </p>
 
-                      <div className="mt-6 border-t border-white/[0.06] pt-4">
+                      <div className="mt-6 border-t border-[#2A2A2A] pt-4">
                         <p className="font-medium text-white">{review.customerName}</p>
-                        <p className="mt-1 text-xs text-zinc-500">
+                        <p className="mt-1 text-xs text-[#6B6B6B]">
                           {review.customerCity} · {review.productName}
                         </p>
                       </div>

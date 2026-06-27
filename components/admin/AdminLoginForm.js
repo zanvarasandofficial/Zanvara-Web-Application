@@ -135,7 +135,7 @@ export default function AdminLoginForm() {
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10">
       <div className={`${adminCardClassName} w-full max-w-md p-8`}>
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-fuchsia-500 text-sm font-bold text-white">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#FFB347] to-[#F59E0B] text-sm font-bold text-[#0A0A0A]">
             Z
           </div>
           <h1 className="text-2xl font-semibold text-slate-900">
@@ -340,7 +340,7 @@ export default function AdminLoginForm() {
         )}
 
         <p className="mt-6 text-center text-sm text-slate-500">
-          <Link href="/" className="font-medium text-violet-700 hover:text-violet-800">
+          <Link href="/" className="font-medium text-[#F59E0B] hover:text-[#FFB347]">
             Back to storefront
           </Link>
         </p>

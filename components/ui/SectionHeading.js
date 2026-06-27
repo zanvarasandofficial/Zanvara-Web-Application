@@ -14,7 +14,7 @@ export default function SectionHeading({
     >
       <div className="max-w-2xl">
         {eyebrow ? (
-          <p className="mb-3 inline-flex items-center rounded-full border border-violet-500/20 bg-violet-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-violet-300">
+          <p className="mb-3 inline-flex items-center rounded-full border border-[#FFB347]/25 bg-[#FFB347]/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#FFD9A6]">
             {eyebrow}
           </p>
         ) : null}
@@ -22,9 +22,7 @@ export default function SectionHeading({
           {title}
         </h2>
         {subtitle ? (
-          <p className="mt-3 text-base leading-7 text-zinc-400 sm:text-lg">
-            {subtitle}
-          </p>
+          <p className="mt-3 text-base leading-7 text-[#A3A3A3] sm:text-lg">{subtitle}</p>
         ) : null}
       </div>
 

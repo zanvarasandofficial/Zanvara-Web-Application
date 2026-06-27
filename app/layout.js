@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   title: "Zanvara | Modern Commerce",
-  description: "Zanvara — a modern dark-themed e-commerce experience.",
+  description: "Zanvara — premium dark commerce with a modern orange-accent experience.",
   applicationName: "Zanvara",
   icons: {
     icon: [{ url: "/icon.svg", type: "image/svg+xml" }],

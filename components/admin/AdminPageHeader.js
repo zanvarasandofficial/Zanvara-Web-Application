@@ -8,7 +8,7 @@ export default function AdminPageHeader({
     <div className="flex flex-col gap-4 border-b border-slate-200 pb-6 sm:flex-row sm:items-end sm:justify-between">
       <div>
         {eyebrow ? (
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-600">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#F59E0B]">
             {eyebrow}
           </p>
         ) : null}

@@ -83,7 +83,7 @@ export default function CheckoutView() {
     <div className="pb-16 pt-8 sm:pt-10">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Reveal>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-300">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#FFD9A6]">
             Checkout
           </p>
           <h1 className="mt-3 text-4xl font-semibold text-white">Complete your order</h1>
@@ -266,7 +266,7 @@ export default function CheckoutView() {
                   <button
                     type="submit"
                     disabled={isSubmitting || !isAuthenticated}
-                    className="mt-6 inline-flex w-full cursor-pointer items-center justify-center rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-violet-600 px-6 py-3.5 text-sm font-semibold text-white transition-all duration-300 hover:shadow-[0_0_32px_rgba(139,92,246,0.35)] disabled:cursor-not-allowed disabled:opacity-60"
+                    className="mt-6 inline-flex w-full cursor-pointer items-center justify-center rounded-2xl bg-gradient-to-r from-[#FFB347] to-[#F59E0B] px-6 py-3.5 text-sm font-semibold text-[#0A0A0A] transition-all duration-300 hover:shadow-[0_0_32px_rgba(255,179,71,0.35)] disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {!isAuthenticated
                       ? "Sign in to place order"
@@ -277,7 +277,7 @@ export default function CheckoutView() {
 
                   <Link
                     href="/cart"
-                    className="mt-3 inline-flex w-full items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] px-6 py-3.5 text-sm font-semibold text-white transition-all duration-300 hover:border-violet-500/35 hover:bg-white/[0.06]"
+                    className="mt-3 inline-flex w-full items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] px-6 py-3.5 text-sm font-semibold text-white transition-all duration-300 hover:border-[#FFB347]/35 hover:bg-white/[0.06]"
                   >
                     Back to Cart
                   </Link>

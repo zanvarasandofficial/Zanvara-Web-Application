@@ -153,7 +153,7 @@ export default function FooterVideoBackground() {
       <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
 
       <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-[#050505]/40" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(139,92,246,0.1),transparent_55%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(255,179,71,0.1),transparent_55%)]" />
       <div className="footer-ambient-vignette absolute inset-0" />
     </div>
   );

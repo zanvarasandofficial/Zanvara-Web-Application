@@ -269,7 +269,7 @@ export default function AdminCategoriesPanel() {
                   type="file"
                   accept="image/jpeg,image/png,image/webp,image/jpg"
                   onChange={(event) => setImageFile(event.target.files?.[0] ?? null)}
-                  className="block w-full text-sm text-slate-600 file:mr-4 file:rounded-xl file:border-0 file:bg-violet-600 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-white hover:file:bg-violet-700"
+                  className="block w-full text-sm text-slate-600 file:mr-4 file:rounded-xl file:border-0 file:bg-[#FFB347] file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-white hover:file:bg-[#F59E0B]"
                 />
               </div>
 

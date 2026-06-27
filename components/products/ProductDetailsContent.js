@@ -18,7 +18,7 @@ export default function ProductDetailsContent({ detailsHtml }) {
     <Reveal delay={120}>
       <section className="mt-14 border-t border-white/[0.06] pt-12">
         <div className="mb-6">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-violet-300">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#FFD9A6]">
             Product Details
           </p>
           <h2 className="mt-2 text-2xl font-semibold text-white sm:text-3xl">

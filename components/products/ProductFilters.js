@@ -5,10 +5,10 @@ import { createPortal } from "react-dom";
 import { productCategories } from "../../lib/data/products";
 
 const inputClassName =
-  "w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none transition-all duration-300 placeholder:text-zinc-600 focus:border-violet-500/40 focus:bg-black/60 focus:shadow-[0_0_0_4px_rgba(139,92,246,0.12)]";
+  "w-full rounded-2xl border border-[#2A2A2A] bg-[#1A1A1A] px-4 py-3 text-sm text-white outline-none transition-all duration-300 placeholder:text-[#6B6B6B] focus:border-[#FFB347]/40 focus:bg-[#111111] focus:shadow-[0_0_0_4px_rgba(255,179,71,0.12)]";
 
 const selectClassName =
-  "w-full cursor-pointer appearance-none rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none transition-all duration-300 focus:border-violet-500/40 focus:bg-black/60 focus:shadow-[0_0_0_4px_rgba(139,92,246,0.12)]";
+  "w-full cursor-pointer appearance-none rounded-2xl border border-[#2A2A2A] bg-[#1A1A1A] px-4 py-3 text-sm text-white outline-none transition-all duration-300 focus:border-[#FFB347]/40 focus:bg-[#111111] focus:shadow-[0_0_0_4px_rgba(255,179,71,0.12)]";
 
 function FieldGroup({ label, children, className = "" }) {
   return (
@@ -120,7 +120,7 @@ function FilterModal({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-zinc-300 transition-colors hover:border-violet-500/30 hover:text-white"
+            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-zinc-300 transition-colors hover:border-[#FFB347]/30 hover:text-white"
           >
             <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
               <path
@@ -210,7 +210,7 @@ function FilterModal({
                       onMinPriceChange(preset.min);
                       onMaxPriceChange(preset.max);
                     }}
-                    className="cursor-pointer rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-2 text-xs font-medium text-zinc-300 transition-all hover:border-violet-500/30 hover:text-white"
+                    className="cursor-pointer rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-2 text-xs font-medium text-zinc-300 transition-all hover:border-[#FFB347]/30 hover:text-white"
                   >
                     {preset.label}
                   </button>
@@ -225,7 +225,7 @@ function FilterModal({
                     type="checkbox"
                     checked={onSaleOnly}
                     onChange={(event) => onSaleOnlyChange(event.target.checked)}
-                    className="h-4 w-4 shrink-0 cursor-pointer accent-violet-500"
+                    className="h-4 w-4 shrink-0 cursor-pointer accent-[#FFB347]"
                   />
                   <span className="text-sm text-zinc-300">On sale only</span>
                 </label>
@@ -234,7 +234,7 @@ function FilterModal({
                     type="checkbox"
                     checked={inStockOnly}
                     onChange={(event) => onInStockOnlyChange(event.target.checked)}
-                    className="h-4 w-4 shrink-0 cursor-pointer accent-violet-500"
+                    className="h-4 w-4 shrink-0 cursor-pointer accent-[#FFB347]"
                   />
                   <span className="text-sm text-zinc-300">In stock only</span>
                 </label>
@@ -254,7 +254,7 @@ function FilterModal({
           <button
             type="button"
             onClick={onApply}
-            className="flex-1 cursor-pointer rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-violet-600 px-4 py-3 text-sm font-semibold text-white transition-all hover:shadow-[0_0_24px_rgba(139,92,246,0.28)]"
+            className="flex-1 cursor-pointer rounded-2xl bg-gradient-to-r from-[#FFB347] to-[#F59E0B] px-4 py-3 text-sm font-semibold text-[#0A0A0A] transition-all hover:shadow-[0_0_24px_rgba(255,179,71,0.28)]"
           >
             Apply Filters
           </button>
@@ -320,7 +320,7 @@ export default function ProductFilters({
         <button
           type="button"
           onClick={onFilterOpen}
-          className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-3 text-sm font-semibold text-white transition-all duration-300 hover:border-violet-500/35 hover:bg-white/[0.07] sm:min-w-[130px]"
+          className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-3 text-sm font-semibold text-white transition-all duration-300 hover:border-[#FFB347]/35 hover:bg-white/[0.07] sm:min-w-[130px]"
         >
           <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden="true">
             <path
@@ -332,7 +332,7 @@ export default function ProductFilters({
           </svg>
           Filters
           {activeFilterCount > 0 ? (
-            <span className="rounded-full bg-violet-500 px-2 py-0.5 text-[11px] font-bold text-white">
+            <span className="rounded-full bg-[#FFB347] px-2 py-0.5 text-[11px] font-bold text-white">
               {activeFilterCount}
             </span>
           ) : null}
