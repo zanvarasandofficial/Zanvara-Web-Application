@@ -16,18 +16,33 @@ export default function ProductReviews({ productId, productName }) {
   const [reviews, setReviews] = useState([]);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [eligibility, setEligibility] = useState(null);
+  const [eligibilityLoading, setEligibilityLoading] = useState(false);
 
   async function loadReviews() {
-    setReviews(getReviewsByProductId(productId));
-    const nextEligibility = await fetchReviewEligibility(
-      productId,
-      user?.id,
-      user?.email,
-    );
-    setEligibility(nextEligibility);
+    try {
+      const productReviews = await getReviewsByProductId(productId);
+      setReviews(Array.isArray(productReviews) ? productReviews : []);
+
+      if (user?.id) {
+        setEligibilityLoading(true);
+        const nextEligibility = await fetchReviewEligibility(productId);
+        setEligibility(nextEligibility);
+      } else {
+        setEligibility(null);
+      }
+    } catch {
+      setReviews([]);
+      setEligibility(null);
+    } finally {
+      setEligibilityLoading(false);
+    }
   }
 
   useEffect(() => {
+    setReviews([]);
+    setEligibility(null);
+    setReviewModalOpen(false);
+    setEligibilityLoading(Boolean(user?.id));
     loadReviews();
 
     function handleReviewsChanged() {
@@ -36,7 +51,15 @@ export default function ProductReviews({ productId, productName }) {
 
     window.addEventListener(REVIEWS_CHANGED_EVENT, handleReviewsChanged);
     return () => window.removeEventListener(REVIEWS_CHANGED_EVENT, handleReviewsChanged);
-  }, [productId, user?.id, user?.email]);
+  }, [productId, user?.id]);
+
+  const canAddReview =
+    !eligibilityLoading &&
+    eligibility?.canReview === true &&
+    eligibility?.state === "eligible";
+
+  const alreadyReviewed =
+    !eligibilityLoading && eligibility?.state === "already_reviewed";
 
   const average =
     reviews.length > 0
@@ -69,11 +92,11 @@ export default function ProductReviews({ productId, productName }) {
               )}
             </div>
 
-            {eligibility?.state === "already_reviewed" ? (
+            {eligibilityLoading ? null : alreadyReviewed ? (
               <p className="inline-flex w-fit items-center rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-5 py-3 text-sm font-medium text-emerald-300">
                 Review submitted
               </p>
-            ) : eligibility?.canReview ? (
+            ) : canAddReview ? (
               <button
                 type="button"
                 onClick={() => setReviewModalOpen(true)}
@@ -128,13 +151,16 @@ export default function ProductReviews({ productId, productName }) {
         </div>
       </section>
 
-      <ReviewSubmitModal
-        open={reviewModalOpen}
-        onClose={() => setReviewModalOpen(false)}
-        productId={productId}
-        productName={productName}
-        onSubmitted={loadReviews}
-      />
+      {canAddReview ? (
+        <ReviewSubmitModal
+          open={reviewModalOpen}
+          onClose={() => setReviewModalOpen(false)}
+          productId={productId}
+          productName={productName}
+          orderNumber={eligibility?.orderNumber ?? null}
+          onSubmitted={loadReviews}
+        />
+      ) : null}
     </>
   );
 }

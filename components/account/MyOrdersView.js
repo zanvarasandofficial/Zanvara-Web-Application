@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import OrderDeliveredSummary from "../orders/OrderDeliveredSummary";
 import OrderTrackingTimeline from "../orders/OrderTrackingTimeline";
 import { useCustomerAuth } from "../../context/CustomerAuthContext";
 import { fetchMyOrders } from "../../lib/api/orders";
@@ -11,7 +12,11 @@ import {
   getOrderStatusLabel,
   isOrderDelivered,
 } from "../../lib/orders/order-status";
-import { hasUserReviewedProduct } from "../../lib/reviews/review-storage";
+import {
+  fetchOrderItemReviewStatus,
+  isOrderItemReviewed,
+  normalizeProductId,
+} from "../../lib/reviews/review-storage";
 import Reveal from "../ui/Reveal";
 import ReviewSubmitModal from "../reviews/ReviewSubmitModal";
 
@@ -35,12 +40,33 @@ function OrderStatusPill({ status }) {
 
 export default function MyOrdersView() {
   const router = useRouter();
-  const { isLoading: isAuthLoading, isAuthenticated, user } = useCustomerAuth();
+  const { isLoading: isAuthLoading, isAuthenticated } = useCustomerAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [reviewTarget, setReviewTarget] = useState(null);
-  const [, setReviewRefresh] = useState(0);
+  const [reviewStatusMap, setReviewStatusMap] = useState({});
+  const [reviewRefresh, setReviewRefresh] = useState(0);
+
+  const deliveredOrderItems = useMemo(() => {
+    const items = [];
+
+    for (const order of orders) {
+      if (!isOrderDelivered(order.status)) continue;
+
+      for (const item of order.items ?? []) {
+        const productId = normalizeProductId(item.productId);
+        if (!productId) continue;
+
+        items.push({
+          orderNumber: order.id,
+          productId,
+        });
+      }
+    }
+
+    return items;
+  }, [orders]);
 
   useEffect(() => {
     if (!isAuthLoading && !isAuthenticated) {
@@ -76,6 +102,29 @@ export default function MyOrdersView() {
     };
   }, [isAuthLoading, isAuthenticated]);
 
+  useEffect(() => {
+    if (isAuthLoading || !isAuthenticated || deliveredOrderItems.length === 0) {
+      setReviewStatusMap({});
+      return;
+    }
+
+    let active = true;
+
+    async function loadReviewStatus() {
+      try {
+        const status = await fetchOrderItemReviewStatus(deliveredOrderItems);
+        if (active) setReviewStatusMap(status ?? {});
+      } catch {
+        if (active) setReviewStatusMap({});
+      }
+    }
+
+    loadReviewStatus();
+    return () => {
+      active = false;
+    };
+  }, [isAuthLoading, isAuthenticated, deliveredOrderItems, reviewRefresh]);
+
   if (isAuthLoading || loading) {
     return (
       <div className="pb-16 pt-8 sm:pt-10">
@@ -96,9 +145,7 @@ export default function MyOrdersView() {
             </p>
             <h1 className="mt-3 text-4xl font-semibold text-white">Order history</h1>
             <p className="mt-3 text-sm leading-7 text-zinc-400">
-              Track your parcel from warehouse dispatch to delivery. Reviews unlock once your
-              order is marked{" "}
-              <span className="font-medium text-emerald-300">Delivered</span>.
+              Active orders show live tracking. Delivered orders show a completion summary.
             </p>
           </Reveal>
 
@@ -123,85 +170,111 @@ export default function MyOrdersView() {
             </Reveal>
           ) : (
             <div className="mt-10 space-y-4">
-              {orders.map((order, index) => (
-                <Reveal key={order.id} delay={index * 50}>
-                  <article className="rounded-[1.75rem] border border-white/[0.08] bg-white/[0.03] p-6">
-                    <div className="flex flex-wrap items-start justify-between gap-4">
-                      <div>
-                        <p className="font-semibold text-white">{order.id}</p>
-                        <p className="mt-1 text-sm text-zinc-500">
-                          {new Date(order.createdAt).toLocaleDateString("en-PK")}
-                        </p>
-                      </div>
-                      <OrderStatusPill status={order.status} />
-                    </div>
+              {orders.map((order, index) => {
+                const delivered = isOrderDelivered(order.status);
 
-                    <div className="mt-6">
-                      <OrderTrackingTimeline status={order.status} variant="dark" compact />
-                    </div>
-
-                    <div className="mt-5 space-y-3">
-                      {order.items?.map((item) => (
-                        <div
-                          key={`${order.id}-${item.productId}`}
-                          className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/[0.06] bg-black/20 px-4 py-3"
-                        >
-                          <div>
-                            <p className="font-medium text-white">{item.name}</p>
-                            <p className="text-sm text-zinc-500">Qty {item.quantity}</p>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <span className="text-sm font-semibold text-white">
-                              {formatPrice(item.price * item.quantity)}
-                            </span>
-                            {isOrderDelivered(order.status) ? (
-                              hasUserReviewedProduct(
-                                item.productId,
-                                user?.id,
-                                user?.email,
-                              ) ? (
-                                <span className="text-xs font-medium text-emerald-300">
-                                  Review submitted
-                                </span>
-                              ) : (
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    setReviewTarget({
-                                      productId: item.productId,
-                                      productName: item.name,
-                                    })
-                                  }
-                                  className="cursor-pointer rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-300 transition hover:border-emerald-500/40 hover:bg-emerald-500/15"
-                                >
-                                  Add review
-                                </button>
-                              )
-                            ) : (
-                              <span className="text-xs text-zinc-500">
-                                {/* Review after delivery */}
-                              </span>
-                            )
-                            }
-                          </div>
+                return (
+                  <Reveal key={order.id} delay={index * 50}>
+                    <article
+                      className={[
+                        "rounded-[1.75rem] border p-6",
+                        delivered
+                          ? "border-emerald-500/15 bg-emerald-500/[0.04]"
+                          : "border-white/[0.08] bg-white/[0.03]",
+                      ].join(" ")}
+                    >
+                      <div className="flex flex-wrap items-start justify-between gap-4">
+                        <div>
+                          <p className="font-semibold text-white">{order.id}</p>
+                          <p className="mt-1 text-sm text-zinc-500">
+                            {new Date(order.createdAt).toLocaleDateString("en-PK")}
+                          </p>
                         </div>
-                      ))}
-                    </div>
-                  </article>
-                </Reveal>
-              ))}
+                        <OrderStatusPill status={order.status} />
+                      </div>
+
+                      {delivered ? (
+                        <OrderDeliveredSummary status={order.status} />
+                      ) : (
+                        <div className="mt-6">
+                          <OrderTrackingTimeline
+                            status={order.status}
+                            variant="dark"
+                            compact
+                          />
+                        </div>
+                      )}
+
+                      <div className="mt-5 space-y-3">
+                        {order.items?.map((item) => {
+                          const productId = normalizeProductId(item.productId);
+                          const reviewed = isOrderItemReviewed(
+                            order.id,
+                            productId,
+                            reviewStatusMap,
+                          );
+
+                          return (
+                            <div
+                              key={`${order.id}-${productId}`}
+                              className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/[0.06] bg-black/20 px-4 py-3"
+                            >
+                              <div>
+                                <p className="font-medium text-white">{item.name}</p>
+                                <p className="text-sm text-zinc-500">Qty {item.quantity}</p>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <span className="text-sm font-semibold text-white">
+                                  {formatPrice(item.price * item.quantity)}
+                                </span>
+                                {delivered && reviewed ? (
+                                  <span className="text-xs font-medium text-emerald-300">
+                                    Review submitted
+                                  </span>
+                                ) : delivered ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (reviewed) return;
+                                      setReviewTarget({
+                                        orderNumber: order.id,
+                                        productId,
+                                        productName: item.name,
+                                      });
+                                    }}
+                                    className="cursor-pointer rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-300 transition hover:border-emerald-500/40 hover:bg-emerald-500/15"
+                                  >
+                                    Add review
+                                  </button>
+                                ) : null}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </article>
+                  </Reveal>
+                );
+              })}
             </div>
           )}
         </div>
       </div>
 
-      <ReviewSubmitModal
-        open={Boolean(reviewTarget)}
-        onClose={() => setReviewTarget(null)}
-        productId={reviewTarget?.productId}
-        productName={reviewTarget?.productName}
-        onSubmitted={() => setReviewRefresh((tick) => tick + 1)}
-      />
+      {reviewTarget && !isOrderItemReviewed(
+        reviewTarget.orderNumber,
+        reviewTarget.productId,
+        reviewStatusMap,
+      ) ? (
+        <ReviewSubmitModal
+          open={Boolean(reviewTarget)}
+          onClose={() => setReviewTarget(null)}
+          orderNumber={reviewTarget.orderNumber}
+          productId={reviewTarget.productId}
+          productName={reviewTarget.productName}
+          onSubmitted={() => setReviewRefresh((tick) => tick + 1)}
+        />
+      ) : null}
     </>
   );
 }

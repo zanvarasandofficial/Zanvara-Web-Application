@@ -113,10 +113,8 @@ export default function AdminReviewFormModal({
       return;
     }
 
-    const productName = selectedProduct?.name || review?.productName || "";
     const payload = {
       productId: form.productId,
-      productName,
       customerName: form.customerName.trim(),
       customerCity: form.customerCity.trim(),
       rating: Number(form.rating),
@@ -130,9 +128,9 @@ export default function AdminReviewFormModal({
 
     try {
       if (mode === "edit" && review) {
-        updateReviewByAdmin(review.id, payload);
+        await updateReviewByAdmin(review.id, payload);
       } else {
-        saveAdminReview(payload);
+        await saveAdminReview(payload);
       }
 
       onSaved?.();

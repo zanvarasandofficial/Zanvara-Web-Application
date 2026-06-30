@@ -111,7 +111,7 @@ export default function AdminCustomersPanel({
         />
       ) : null}
 
-      <section className={`${adminCardClassName} ${compact ? "" : "mt-8"} overflow-hidden`}>
+      <section className={`${adminCardClassName} ${compact ? "" : "mt-8"} overflow-hidden mt-8`}>
         <div className="flex flex-col gap-4 border-b border-slate-200 px-6 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h2 className="text-lg font-semibold text-slate-900">{title}</h2>

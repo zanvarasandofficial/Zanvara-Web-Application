@@ -20,10 +20,22 @@ function filterByAge(items, getDate, minDays, maxDays) {
   });
 }
 
-function sumRevenue(orders) {
-  return orders
-    .filter((order) => isOrderDelivered(order.status))
-    .reduce((total, order) => total + (order.total ?? 0), 0);
+function getDeliveredOrders(orders) {
+  return orders.filter((order) => isOrderDelivered(order.status));
+}
+
+function sumSubtotalRevenue(orders) {
+  return getDeliveredOrders(orders).reduce(
+    (total, order) => total + (order.subtotal ?? 0),
+    0,
+  );
+}
+
+function sumDeliveryCharges(orders) {
+  return getDeliveredOrders(orders).reduce(
+    (total, order) => total + (order.deliveryTotal ?? 0),
+    0,
+  );
 }
 
 function countActiveOrders(orders) {
@@ -65,8 +77,10 @@ function buildDashboardStats(orders, products, users) {
   const recentOrders = filterByAge(orders, (order) => order.createdAt, 0, 30);
   const previousOrders = filterByAge(orders, (order) => order.createdAt, 30, 60);
 
-  const revenueCurrent = sumRevenue(recentOrders);
-  const revenuePrevious = sumRevenue(previousOrders);
+  const revenueCurrent = sumSubtotalRevenue(recentOrders);
+  const revenuePrevious = sumSubtotalRevenue(previousOrders);
+  const deliveryCurrent = sumDeliveryCharges(recentOrders);
+  const deliveryPrevious = sumDeliveryCharges(previousOrders);
   const ordersCurrent = countActiveOrders(recentOrders);
   const ordersPrevious = countActiveOrders(previousOrders);
   const pendingOrders = countPendingOrders(orders);
@@ -94,16 +108,24 @@ function buildDashboardStats(orders, products, users) {
   );
 
   const revenueChange = buildPeriodChange(revenueCurrent, revenuePrevious);
+  const deliveryChange = buildPeriodChange(deliveryCurrent, deliveryPrevious);
   const ordersChange = buildPeriodChange(ordersCurrent, ordersPrevious);
   const customersChange = buildPeriodChange(recentUsers.length, previousUsers.length);
 
   return [
     {
       label: "Total Revenue",
-      value: formatPrice(sumRevenue(orders)),
+      value: formatPrice(sumSubtotalRevenue(orders)),
       change: revenueChange?.change,
       trend: revenueChange?.trend ?? "up",
-      note: "from delivered orders only",
+      note: "product sales · delivered only",
+    },
+    {
+      label: "Delivery Charges",
+      value: formatPrice(sumDeliveryCharges(orders)),
+      change: deliveryChange?.change,
+      trend: deliveryChange?.trend ?? "up",
+      note: "shipping fees · delivered only",
     },
     {
       label: "Orders",
@@ -131,6 +153,7 @@ function buildDashboardStats(orders, products, users) {
 
 const loadingStats = [
   { label: "Total Revenue", value: "—", note: "Loading..." },
+  { label: "Delivery Charges", value: "—", note: "Loading..." },
   { label: "Orders", value: "—", note: "Loading..." },
   { label: "Products", value: "—", note: "Loading..." },
   { label: "Customers", value: "—", note: "Loading..." },
@@ -175,7 +198,7 @@ export default function AdminDashboardStatsSection() {
   }, []);
 
   return (
-    <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
       {stats.map((stat) => (
         <StatCard key={stat.label} {...stat} />
       ))}

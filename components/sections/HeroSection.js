@@ -16,20 +16,9 @@ import {
   formatHeroRating,
 } from "../../lib/api/storefront-stats";
 import {
-  getPublishedReviews,
+  getReviewSummary,
   REVIEWS_CHANGED_EVENT,
 } from "../../lib/reviews/review-storage";
-
-function loadReviewRating() {
-  const reviews = getPublishedReviews();
-
-  if (reviews.length === 0) {
-    return 0;
-  }
-
-  const total = reviews.reduce((sum, review) => sum + review.rating, 0);
-  return total / reviews.length;
-}
 
 export default function HeroSection({ hero }) {
   const mediaType = hero?.mediaType ?? "video";
@@ -50,7 +39,14 @@ export default function HeroSection({ hero }) {
     }
 
     async function loadStats() {
-      const ratingValue = loadReviewRating();
+      let ratingValue = 0;
+
+      try {
+        const summary = await getReviewSummary();
+        ratingValue = summary?.average ?? 0;
+      } catch {
+        ratingValue = 0;
+      }
 
       try {
         const apiStats = await fetchStorefrontStats();

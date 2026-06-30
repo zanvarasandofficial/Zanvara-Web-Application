@@ -39,6 +39,7 @@ function unlockBodyScroll(scrollY) {
 export default function ReviewSubmitModal({
   open,
   onClose,
+  orderNumber = null,
   productId,
   productName,
   onSubmitted,
@@ -82,11 +83,20 @@ export default function ReviewSubmitModal({
     }
 
     let active = true;
+    setEligibility(null);
     setEligibilityLoading(true);
 
-    fetchReviewEligibility(productId, user?.id, user?.email)
+    fetchReviewEligibility(productId, orderNumber || undefined)
       .then((result) => {
-        if (active) setEligibility(result);
+        if (!active) return;
+
+        if (result?.state === "already_reviewed") {
+          onClose();
+          onSubmitted?.();
+          return;
+        }
+
+        setEligibility(result);
       })
       .finally(() => {
         if (active) setEligibilityLoading(false);
@@ -95,21 +105,23 @@ export default function ReviewSubmitModal({
     return () => {
       active = false;
     };
-  }, [open, productId, isAuthenticated, isLoading, user?.id, user?.email]);
+  }, [open, productId, orderNumber, isAuthenticated, isLoading, user?.id, onClose, onSubmitted]);
+
+  useEffect(() => {
+    if (!open || eligibilityLoading || !eligibility) return;
+
+    if (eligibility.state === "already_reviewed") {
+      onClose();
+      onSubmitted?.();
+    }
+  }, [open, eligibility, eligibilityLoading, onClose, onSubmitted]);
 
   useEffect(() => {
     if (!open) return;
 
     const scrollY = lockBodyScroll();
 
-    function handleKeyDown(event) {
-      if (event.key === "Escape") onClose();
-    }
-
-    window.addEventListener("keydown", handleKeyDown);
-
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
       unlockBodyScroll(scrollY);
     };
   }, [open, onClose]);
@@ -130,13 +142,10 @@ export default function ReviewSubmitModal({
     setIsSubmitting(true);
 
     try {
-      saveUserReview({
+      await saveUserReview({
         productId,
-        productName,
-        customerName: profileName,
+        orderNumber: orderNumber || eligibility.orderNumber || undefined,
         customerCity: customerCity.trim(),
-        userId: user?.id ?? null,
-        userEmail: user?.email ?? null,
         orderId: eligibility.orderId ?? null,
         rating,
         title: title.trim(),
@@ -157,6 +166,10 @@ export default function ReviewSubmitModal({
     return null;
   }
 
+  if (!eligibilityLoading && eligibility?.state === "already_reviewed") {
+    return null;
+  }
+
   return createPortal(
     <>
       <div
@@ -165,11 +178,9 @@ export default function ReviewSubmitModal({
         aria-modal="true"
         aria-labelledby="review-submit-title"
       >
-        <button
-          type="button"
-          aria-label="Close review dialog"
-          className="fixed inset-0 cursor-pointer bg-black/80 backdrop-blur-md"
-          onClick={onClose}
+        <div
+          aria-hidden="true"
+          className="fixed inset-0 bg-black/80 backdrop-blur-md"
         />
 
         <div
@@ -179,9 +190,17 @@ export default function ReviewSubmitModal({
           <button
             type="button"
             onClick={onClose}
-            className="absolute right-4 top-4 rounded-lg px-2 py-1 text-sm text-zinc-500 transition-colors hover:bg-white/[0.05] hover:text-white"
+            aria-label="Close"
+            className="absolute right-4 top-4 inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-white/[0.05] hover:text-white"
           >
-            Close
+            <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden="true">
+              <path
+                d="M6 6L18 18M18 6L6 18"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+              />
+            </svg>
           </button>
 
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#FFD9A6]">
@@ -216,9 +235,11 @@ export default function ReviewSubmitModal({
               </a>
             </div>
           ) : !eligibility?.canReview ? (
+            eligibility?.state === "already_reviewed" ? null : (
             <div className="mt-8 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-4 text-sm leading-7 text-amber-100">
               {eligibility?.message}
             </div>
+            )
           ) : !profileName ? (
             <div className="mt-8 space-y-4">
               <p className="rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-4 text-sm leading-7 text-amber-100">

@@ -18,8 +18,13 @@ export default function AdminDashboardReviewsSection() {
   const [reviews, setReviews] = useState([]);
   const [addOpen, setAddOpen] = useState(false);
 
-  function loadReviews() {
-    setReviews(getAdminReviewRows().slice(0, 5));
+  async function loadReviews() {
+    try {
+      const rows = await getAdminReviewRows();
+      setReviews(Array.isArray(rows) ? rows.slice(0, 5) : []);
+    } catch {
+      setReviews([]);
+    }
   }
 
   useEffect(() => {

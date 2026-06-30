@@ -2,6 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import LogoMark from "../brand/LogoMark";
+import {
+  ADMIN_BADGES_CHANGED_EVENT,
+  badgeCountForSection,
+  fetchSidebarBadgeCounts,
+  markSectionSeen,
+} from "../../lib/admin/sidebar-badges";
 
 const navItems = [
   {
@@ -29,6 +37,7 @@ const navItems = [
   {
     href: "/dashboard/admin/orders",
     label: "Orders",
+    badgeKey: "orders",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
         <path d="M7 7H17L16 17H8L7 7Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
@@ -78,6 +87,7 @@ const navItems = [
   {
     href: "/dashboard/admin/reviews",
     label: "Reviews",
+    badgeKey: "reviews",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
         <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
@@ -87,6 +97,7 @@ const navItems = [
   {
     href: "/dashboard/admin/messages",
     label: "Messages",
+    badgeKey: "messages",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
         <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.6" />
@@ -122,15 +133,77 @@ function isActivePath(pathname, href, exact = false) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+function SidebarBadge({ count, active }) {
+  if (!count || count <= 0) {
+    return null;
+  }
+
+  return (
+    <span
+      className={[
+        "ml-auto inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full px-1.5 text-[11px] font-bold leading-none",
+        active ? "bg-white text-[#F59E0B]" : "bg-rose-500 text-white",
+      ].join(" ")}
+    >
+      {count > 99 ? "99+" : count}
+    </span>
+  );
+}
+
+function markSeenForPath(pathname) {
+  if (pathname.startsWith("/dashboard/admin/orders")) {
+    markSectionSeen("orders");
+    return;
+  }
+
+  if (pathname.startsWith("/dashboard/admin/reviews")) {
+    markSectionSeen("reviews");
+    return;
+  }
+
+  if (pathname.startsWith("/dashboard/admin/messages")) {
+    markSectionSeen("messages");
+  }
+}
+
 export default function AdminSidebar({ mobileOpen, onClose }) {
   const pathname = usePathname();
+  const [badges, setBadges] = useState({ orders: 0, reviews: 0, messages: 0 });
+
+  useEffect(() => {
+    markSeenForPath(pathname);
+  }, [pathname]);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadBadges() {
+      try {
+        const counts = await fetchSidebarBadgeCounts();
+        if (active) setBadges(counts);
+      } catch {
+        if (active) setBadges({ orders: 0, reviews: 0, messages: 0 });
+      }
+    }
+
+    loadBadges();
+
+    const interval = window.setInterval(loadBadges, 45000);
+    const handleBadgesChanged = () => loadBadges();
+
+    window.addEventListener(ADMIN_BADGES_CHANGED_EVENT, handleBadgesChanged);
+
+    return () => {
+      active = false;
+      window.clearInterval(interval);
+      window.removeEventListener(ADMIN_BADGES_CHANGED_EVENT, handleBadgesChanged);
+    };
+  }, [pathname]);
 
   const navContent = (
     <>
       <div className="flex h-16 items-center gap-3 border-b border-slate-200 px-5">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#FFB347] to-[#F59E0B] text-sm font-bold text-[#0A0A0A] shadow-lg shadow-[#FFB347]/20">
-          Z
-        </div>
+        <LogoMark />
         <div>
           <p className="text-sm font-semibold text-slate-900">Zanvara Admin</p>
           <p className="text-xs text-slate-500">Store management</p>
@@ -140,6 +213,9 @@ export default function AdminSidebar({ mobileOpen, onClose }) {
       <nav className="flex-1 space-y-1 overflow-y-auto p-4">
         {navItems.map((item) => {
           const active = isActivePath(pathname, item.href, item.exact);
+          const badgeCount = item.badgeKey
+            ? badgeCountForSection(item.badgeKey, badges)
+            : 0;
 
           return (
             <Link
@@ -154,7 +230,8 @@ export default function AdminSidebar({ mobileOpen, onClose }) {
               ].join(" ")}
             >
               {item.icon}
-              {item.label}
+              <span className="min-w-0 flex-1">{item.label}</span>
+              <SidebarBadge count={badgeCount} active={active} />
             </Link>
           );
         })}

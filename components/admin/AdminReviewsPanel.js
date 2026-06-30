@@ -52,9 +52,17 @@ export default function AdminReviewsPanel() {
   const [addOpen, setAddOpen] = useState(false);
   const [editReview, setEditReview] = useState(null);
 
-  function loadReviews() {
-    setReviews(getAdminReviewRows());
-    setStats(getReviewStats());
+  async function loadReviews() {
+    try {
+      const [rows, nextStats] = await Promise.all([
+        getAdminReviewRows(),
+        getReviewStats(),
+      ]);
+      setReviews(Array.isArray(rows) ? rows : []);
+      setStats(nextStats ?? stats);
+    } catch {
+      setReviews([]);
+    }
   }
 
   useEffect(() => {
@@ -84,19 +92,19 @@ export default function AdminReviewsPanel() {
     });
   }, [reviews, search, statusFilter]);
 
-  function handleApprove(review) {
-    updateReviewByAdmin(review.id, { status: "Published", verified: true });
+  async function handleApprove(review) {
+    await updateReviewByAdmin(review.id, { status: "Published", verified: true });
     loadReviews();
   }
 
-  function handleReject(review) {
-    updateReviewByAdmin(review.id, { status: "Rejected" });
+  async function handleReject(review) {
+    await updateReviewByAdmin(review.id, { status: "Rejected" });
     loadReviews();
   }
 
-  function handleDelete(review) {
+  async function handleDelete(review) {
     if (!window.confirm(`Delete review by ${review.customerName}?`)) return;
-    deleteReviewByAdmin(review.id);
+    await deleteReviewByAdmin(review.id);
     loadReviews();
     if (editReview?.id === review.id) {
       setEditReview(null);

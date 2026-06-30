@@ -58,14 +58,7 @@ export default function CheckoutAuthModal({ open, onClose, onSuccess }) {
 
     const scrollY = lockBodyScroll();
 
-    function handleKeyDown(event) {
-      if (event.key === "Escape") onClose();
-    }
-
-    window.addEventListener("keydown", handleKeyDown);
-
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
       unlockBodyScroll(scrollY);
     };
   }, [open, onClose]);
@@ -112,11 +105,9 @@ export default function CheckoutAuthModal({ open, onClose, onSuccess }) {
       aria-modal="true"
       aria-labelledby="checkout-auth-title"
     >
-      <button
-        type="button"
-        aria-label="Close sign in dialog"
-        className="fixed inset-0 cursor-pointer bg-black/80 backdrop-blur-md"
-        onClick={onClose}
+      <div
+        aria-hidden="true"
+        className="fixed inset-0 bg-black/80 backdrop-blur-md"
       />
 
       <div
@@ -126,9 +117,17 @@ export default function CheckoutAuthModal({ open, onClose, onSuccess }) {
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-4 top-4 rounded-lg px-2 py-1 text-sm text-zinc-500 transition-colors hover:bg-white/[0.05] hover:text-white"
+          aria-label="Close"
+          className="absolute right-4 top-4 inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-white/[0.05] hover:text-white"
         >
-          Close
+          <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden="true">
+            <path
+              d="M6 6L18 18M18 6L6 18"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+            />
+          </svg>
         </button>
 
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#FFD9A6]">

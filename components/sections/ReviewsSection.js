@@ -28,9 +28,17 @@ export default function ReviewsSection({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    function loadReviews() {
-      setReviews(getPublishedReviews());
-      setLoading(false);
+    async function loadReviews() {
+      setLoading(true);
+
+      try {
+        const data = await getPublishedReviews();
+        setReviews(Array.isArray(data) ? data : []);
+      } catch {
+        setReviews([]);
+      } finally {
+        setLoading(false);
+      }
     }
 
     loadReviews();
