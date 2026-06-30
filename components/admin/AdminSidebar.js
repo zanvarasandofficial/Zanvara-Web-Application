@@ -37,6 +37,26 @@ const navItems = [
     ),
   },
   {
+    href: "/dashboard/admin/notifications",
+    label: "Notifications",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
+        <path
+          d="M12 5C9.2 5 7 7.2 7 10V15L5 17V18H19V17L17 15V10C17 7.2 14.8 5 12 5Z"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M10 18C10.2 19.1 11 20 12 20C13 20 13.8 19.1 14 18"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+        />
+      </svg>
+    ),
+  },
+  {
     href: "/dashboard/admin/categories",
     label: "Categories",
     icon: (

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { adminFetch } from "../../lib/api/admin-client";
-import { ORDER_STATUS, readOrderHistory } from "../../lib/orders/order-storage";
+import { ORDER_STATUS, isOrderDelivered, normalizeOrderStatus } from "../../lib/orders/order-status";
 import { formatPrice } from "../../lib/products/pricing";
 import StatCard from "./StatCard";
 
@@ -22,12 +22,25 @@ function filterByAge(items, getDate, minDays, maxDays) {
 
 function sumRevenue(orders) {
   return orders
-    .filter((order) => order.status !== ORDER_STATUS.CANCELLED)
+    .filter((order) => isOrderDelivered(order.status))
     .reduce((total, order) => total + (order.total ?? 0), 0);
 }
 
-function countOrders(orders) {
-  return orders.filter((order) => order.status !== ORDER_STATUS.CANCELLED).length;
+function countActiveOrders(orders) {
+  return orders.filter(
+    (order) => normalizeOrderStatus(order.status) !== ORDER_STATUS.CANCELLED,
+  ).length;
+}
+
+function countCompletedOrders(orders) {
+  return orders.filter((order) => isOrderDelivered(order.status)).length;
+}
+
+function countPendingOrders(orders) {
+  return orders.filter((order) => {
+    const status = normalizeOrderStatus(order.status);
+    return status !== ORDER_STATUS.CANCELLED && status !== ORDER_STATUS.DELIVERED;
+  }).length;
 }
 
 function buildPeriodChange(current, previous) {
@@ -54,14 +67,31 @@ function buildDashboardStats(orders, products, users) {
 
   const revenueCurrent = sumRevenue(recentOrders);
   const revenuePrevious = sumRevenue(previousOrders);
-  const ordersCurrent = countOrders(recentOrders);
-  const ordersPrevious = countOrders(previousOrders);
+  const ordersCurrent = countActiveOrders(recentOrders);
+  const ordersPrevious = countActiveOrders(previousOrders);
+  const pendingOrders = countPendingOrders(orders);
+  const completedOrders = countCompletedOrders(orders);
 
   const publishedProducts = products.filter((product) => product.status === "PUBLISHED");
-  const newProducts = filterByAge(products, (product) => product.createdAt, 0, 30).length;
+  const newProducts = filterByAge(
+    products,
+    (product) => product.createdAt ?? product.updatedAt,
+    0,
+    30,
+  ).length;
 
-  const recentUsers = filterByAge(users, (user) => user.createdAt, 0, 30);
-  const previousUsers = filterByAge(users, (user) => user.createdAt, 30, 60);
+  const recentUsers = filterByAge(
+    users,
+    (user) => user.createdAt,
+    0,
+    30,
+  );
+  const previousUsers = filterByAge(
+    users,
+    (user) => user.createdAt,
+    30,
+    60,
+  );
 
   const revenueChange = buildPeriodChange(revenueCurrent, revenuePrevious);
   const ordersChange = buildPeriodChange(ordersCurrent, ordersPrevious);
@@ -73,14 +103,14 @@ function buildDashboardStats(orders, products, users) {
       value: formatPrice(sumRevenue(orders)),
       change: revenueChange?.change,
       trend: revenueChange?.trend ?? "up",
-      note: "from checkout orders",
+      note: "from delivered orders only",
     },
     {
       label: "Orders",
-      value: String(countOrders(orders)),
+      value: String(countActiveOrders(orders)),
       change: ordersChange?.change,
       trend: ordersChange?.trend ?? "up",
-      note: "vs previous 30 days",
+      note: `${pendingOrders} pending · ${completedOrders} completed`,
     },
     {
       label: "Products",
@@ -113,10 +143,9 @@ export default function AdminDashboardStatsSection() {
     let active = true;
 
     async function loadStats() {
-      const orders = readOrderHistory();
-
       try {
-        const [products, users] = await Promise.all([
+        const [orders, products, users] = await Promise.all([
+          adminFetch("/admin/orders"),
           adminFetch("/admin/products"),
           adminFetch("/admin/users"),
         ]);
@@ -126,7 +155,7 @@ export default function AdminDashboardStatsSection() {
         }
       } catch {
         if (active) {
-          setStats(buildDashboardStats(orders, [], []));
+          setStats(loadingStats.map((stat) => ({ ...stat, note: "Could not load stats." })));
         }
       }
     }

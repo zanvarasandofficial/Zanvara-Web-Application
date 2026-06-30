@@ -6,6 +6,10 @@ import { useRouter } from "next/navigation";
 import { AdminSidebarToggle } from "./AdminSidebar";
 import { useAdminAuth } from "../../context/AdminAuthContext";
 import { adminFetch } from "../../lib/api/admin-client";
+import {
+  formatNotificationTime,
+  getNotificationHref,
+} from "../../lib/admin/notifications";
 
 function getInitials(user) {
   if (user?.name) {
@@ -20,30 +24,6 @@ function getInitials(user) {
   return user?.email?.slice(0, 2).toUpperCase() ?? "AD";
 }
 
-function formatNotificationTitle(item) {
-  if (item.type === "NEWSLETTER") {
-    return `Newsletter signup: ${item.email}`;
-  }
-
-  const name = [item.firstName, item.lastName].filter(Boolean).join(" ").trim();
-  return name ? `New contact from ${name}` : `New contact from ${item.email}`;
-}
-
-function formatNotificationBody(item) {
-  if (item.type === "NEWSLETTER") {
-    return "A visitor subscribed from the footer.";
-  }
-
-  return item.message?.trim() || "No message provided.";
-}
-
-function formatTime(value) {
-  return new Date(value).toLocaleString("en-PK", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
-}
-
 export default function AdminTopbar({ onOpenSidebar }) {
   const router = useRouter();
   const { user, logout } = useAdminAuth();
@@ -55,38 +35,27 @@ export default function AdminTopbar({ onOpenSidebar }) {
 
   const unreadCount = notifications.filter((item) => item.status === "NEW").length;
 
-  useEffect(() => {
-    let active = true;
+  async function loadNotifications() {
+    setLoadingNotifications(true);
 
-    async function loadNotifications() {
-      setLoadingNotifications(true);
-
-      try {
-        const data = await adminFetch("/admin/inbound");
-
-        if (active) {
-          setNotifications(Array.isArray(data) ? data.slice(0, 8) : []);
-        }
-      } catch {
-        if (active) {
-          setNotifications([]);
-        }
-      } finally {
-        if (active) {
-          setLoadingNotifications(false);
-        }
-      }
+    try {
+      const data = await adminFetch("/admin/notifications?limit=8");
+      setNotifications(Array.isArray(data) ? data : []);
+    } catch {
+      setNotifications([]);
+    } finally {
+      setLoadingNotifications(false);
     }
+  }
 
+  useEffect(() => {
     loadNotifications();
-
-    return () => {
-      active = false;
-    };
   }, []);
 
   useEffect(() => {
     if (!notificationsOpen) return undefined;
+
+    loadNotifications();
 
     function handlePointerDown(event) {
       if (
@@ -121,7 +90,7 @@ export default function AdminTopbar({ onOpenSidebar }) {
 
   async function markAsRead(id) {
     try {
-      const updated = await adminFetch(`/admin/inbound/${id}/status`, {
+      const updated = await adminFetch(`/admin/notifications/${id}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "READ" }),
@@ -141,7 +110,7 @@ export default function AdminTopbar({ onOpenSidebar }) {
     }
 
     setNotificationsOpen(false);
-    router.push("/dashboard/admin/messages");
+    router.push(getNotificationHref(item));
   }
 
   return (
@@ -195,7 +164,7 @@ export default function AdminTopbar({ onOpenSidebar }) {
                     <p className="text-xs text-slate-500">
                       {unreadCount > 0
                         ? `${unreadCount} unread update${unreadCount === 1 ? "" : "s"}`
-                        : "You are all caught up"}
+                        : "Orders and customer logins only"}
                     </p>
                   </div>
                   {unreadCount > 0 ? (
@@ -227,13 +196,13 @@ export default function AdminTopbar({ onOpenSidebar }) {
                       />
                       <span className="min-w-0 flex-1">
                         <span className="block text-sm font-medium text-slate-900">
-                          {formatNotificationTitle(item)}
+                          {item.title}
                         </span>
                         <span className="mt-1 block line-clamp-2 text-xs leading-5 text-slate-500">
-                          {formatNotificationBody(item)}
+                          {item.body}
                         </span>
                         <span className="mt-1 block text-[11px] text-slate-400">
-                          {formatTime(item.createdAt)}
+                          {formatNotificationTime(item.createdAt)}
                         </span>
                       </span>
                     </button>
@@ -243,11 +212,11 @@ export default function AdminTopbar({ onOpenSidebar }) {
 
               <div className="border-t border-slate-100 px-4 py-3">
                 <Link
-                  href="/dashboard/admin/messages"
+                  href="/dashboard/admin/notifications"
                   onClick={() => setNotificationsOpen(false)}
                   className="inline-flex cursor-pointer text-sm font-semibold text-[#F59E0B] transition hover:text-[#FFB347]"
                 >
-                  View all messages
+                  View all notifications
                 </Link>
               </div>
             </div>
