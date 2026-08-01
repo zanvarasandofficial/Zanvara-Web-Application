@@ -243,3 +243,36 @@ body {
   background: #ffb347;
   border-radius: 10px;
 }
+
+@keyframes promo-glow-drift {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    opacity: 0.95;
+    transform: translate(-12px, 10px) scale(1.12);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .promo-banner-glow {
+    animation: promo-glow-drift 7s ease-in-out infinite;
+  }
+
+  .promo-banner-glow-secondary {
+    animation: promo-glow-drift 9s ease-in-out infinite reverse;
+  }
+
+  .promo-tag-chip {
+    transition:
+      transform 0.25s ease,
+      border-color 0.25s ease,
+      background-color 0.25s ease;
+  }
+
+  .promo-tag-chip:hover {
+    transform: translateY(-2px);
+  }
+}

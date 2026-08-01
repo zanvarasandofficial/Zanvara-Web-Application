@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getZanvaraAppStoreUrls, ZANVARA_APP_ANCHOR } from "../../lib/content/zanvara-app";
 
 const badgeClass =
-  "inline-flex flex-1 items-center justify-center rounded-2xl border border-[#FFB347]/35 bg-[#1A1A1A] px-4 py-3 text-sm font-semibold text-white transition-all duration-300 hover:border-[#FFB347]/55 hover:bg-[#111111] sm:flex-none sm:min-w-[9.5rem]";
+  "inline-flex flex-1 items-center justify-center rounded-2xl border border-[#FFB347]/35 bg-[#1A1A1A] px-4 py-3 text-sm font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 hover:border-[#FFB347]/55 hover:bg-[#111111] hover:shadow-[0_8px_28px_rgba(255,179,71,0.12)] sm:flex-none sm:min-w-[9.5rem]";
 
 export default function AppStoreBadges({ className = "", compact = false }) {
   const { ios, android } = getZanvaraAppStoreUrls();
