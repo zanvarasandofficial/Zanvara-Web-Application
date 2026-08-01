@@ -1,10 +1,14 @@
 import LegalPageLayout from "../../components/legal/LegalPageLayout";
 import { CONTACT_EMAIL } from "../../lib/data/contact";
+import { buildPageMetadata } from "../../lib/seo/metadata";
 
-export const metadata = {
-  title: "Privacy Policy | Zanvara",
-  description: "How Zanvara collects, uses, and protects your personal information.",
-};
+export const metadata = buildPageMetadata({
+  title: "Privacy policy",
+  description:
+    "Zanvara privacy policy — how we collect, use, and protect your personal data when you shop kinetic sand tables and use our website.",
+  path: "/privacy",
+  keywords: ["Zanvara privacy", "data protection Pakistan"],
+});
 
 const sections = [
   {

@@ -5,6 +5,7 @@ import {
   getOrderStatusDescription,
   getOrderStatusLabel,
   getOrderStatusStepIndex,
+  getOrderTrackingSteps,
   isOrderCancelled,
   normalizeOrderStatus,
 } from "../../lib/orders/order-status";
@@ -83,13 +84,15 @@ function StepIcon({ step, isComplete, isCurrent }) {
 
 export default function OrderTrackingTimeline({
   status,
+  fulfillmentKind = "standard",
   variant = "dark",
   showHeading = true,
   compact = false,
 }) {
   const styles = variantStyles[variant] ?? variantStyles.dark;
   const normalized = normalizeOrderStatus(status);
-  const currentIndex = getOrderStatusStepIndex(status);
+  const trackingSteps = getOrderTrackingSteps(fulfillmentKind);
+  const currentIndex = getOrderStatusStepIndex(status, fulfillmentKind);
   const isDelivered = normalized === ORDER_STATUS.DELIVERED;
 
   if (isOrderCancelled(status)) {
@@ -118,15 +121,15 @@ export default function OrderTrackingTimeline({
         </div>
       ) : null}
 
-      <ol className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-4">
-        {ORDER_TRACKING_STEPS.map((step, index) => {
+      <ol className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-4 lg:grid-cols-5">
+        {trackingSteps.map((step, index) => {
           const info = ORDER_STATUS_INFO[step];
           const isComplete = isDelivered || index < currentIndex;
           const isCurrent = !isDelivered && index === currentIndex;
 
           return (
             <li key={step} className="relative flex flex-col items-center px-1 text-center">
-              {index < ORDER_TRACKING_STEPS.length - 1 ? (
+              {index < trackingSteps.length - 1 ? (
                 <span
                   aria-hidden="true"
                   className={[

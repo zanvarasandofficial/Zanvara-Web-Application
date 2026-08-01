@@ -2,11 +2,15 @@ import Link from "next/link";
 import Reveal from "../../components/ui/Reveal";
 import ContactLinks from "../../components/ui/ContactLinks";
 import { gradientTextClass, outlineBtnClass, primaryBtnClass } from "../../lib/ui/theme";
+import { buildPageMetadata } from "../../lib/seo/metadata";
 
-export const metadata = {
-  title: "About Us | Zanvara",
-  description: "Learn how Zanvara grew into a modern e-commerce brand built on trust and quality.",
-};
+export const metadata = buildPageMetadata({
+  title: "About Zanvara",
+  description:
+    "Learn how Zanvara builds premium kinetic sand tables and calm-living products for homes across Pakistan — quality, trust, and cash on delivery.",
+  path: "/about",
+  keywords: ["Zanvara about", "kinetic sand table brand", "Pakistan ecommerce"],
+});
 
 const milestones = [
   {

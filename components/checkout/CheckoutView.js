@@ -7,9 +7,28 @@ import { useEffect, useState } from "react";
 import CheckoutAuthSection from "../auth/CheckoutAuthSection";
 import { useCart } from "../../context/CartContext";
 import { useCustomerAuth } from "../../context/CustomerAuthContext";
+import { useCurrency } from "../../context/CurrencyContext";
 import { formatPrice } from "../../lib/data/products";
 import { saveLastOrder } from "../../lib/cart/storage";
 import { createOrder } from "../../lib/api/orders";
+import {
+  PAYMENT_CHECKOUT_BODY,
+  PAYMENT_CHECKOUT_TITLE,
+} from "../../lib/content/store-policy";
+import {
+  paymentMethodFromFormValue,
+  PAYMENT_ONLINE_CHECKOUT_BODY,
+  PAYMENT_ONLINE_CHECKOUT_TITLE,
+} from "../../lib/payments/checkout";
+import { cartHasPreOrderItems, formatExpectedShipFromLine, isCartLinePreOrder } from "../../lib/products/fulfillment";
+import {
+  PRE_ORDER_CHECKOUT_ACK,
+  PRE_ORDER_CHECKOUT_ACK_ONLINE,
+  PRE_ORDER_CHECKOUT_BODY,
+  PRE_ORDER_CHECKOUT_BODY_INTERNATIONAL,
+  PRE_ORDER_CHECKOUT_TITLE,
+  PRE_ORDER_MIXED_CART,
+} from "../../lib/content/pre-order";
 import { inputClassName, labelClassName } from "../../lib/ui/formStyles";
 import Reveal from "../ui/Reveal";
 import OrderCompleteSuccess from "./OrderCompleteSuccess";
@@ -17,11 +36,20 @@ import { useToast } from "../../context/ToastContext";
 
 export default function CheckoutView() {
   const router = useRouter();
-  const { items, subtotal, deliveryTotal, total, clearCart, isReady } = useCart();
+  const { items, subtotal, deliveryTotal, deliveryNote, fulfillmentKind, total, clearCart, isReady } =
+    useCart();
+  const [preOrderAck, setPreOrderAck] = useState(false);
   const { user, isLoading: isAuthLoading, isAuthenticated } = useCustomerAuth();
+  const { currency, countryCode, pkrToUsdRate, isInternationalDisplay, isPakistanVisitor } =
+    useCurrency();
   const { showToast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [completedOrder, setCompletedOrder] = useState(null);
+  const [paymentChoice, setPaymentChoice] = useState(isPakistanVisitor ? "cod" : "online");
+
+  useEffect(() => {
+    setPaymentChoice(isPakistanVisitor ? "cod" : "online");
+  }, [isPakistanVisitor]);
 
   useEffect(() => {
     if (isReady && items.length === 0 && !completedOrder) {
@@ -41,10 +69,17 @@ export default function CheckoutView() {
     return null;
   }
 
+  const hasPreOrderLines = cartHasPreOrderItems(items);
+
   async function handleSubmit(event) {
     event.preventDefault();
 
     if (!isAuthenticated || !user) {
+      return;
+    }
+
+    if (hasPreOrderLines && !preOrderAck) {
+      showToast("Please confirm the pre-order terms to continue.", "error");
       return;
     }
 
@@ -53,12 +88,20 @@ export default function CheckoutView() {
     const formData = new FormData(event.currentTarget);
 
     try {
+      const methodKey = String(formData.get("paymentMethod") || paymentChoice);
+      const paymentMethod = paymentMethodFromFormValue(
+        isPakistanVisitor ? methodKey : "online",
+      );
+
       const order = await createOrder({
         items: items.map((item) => ({ ...item })),
         subtotal,
         deliveryTotal,
         total,
-        paymentMethod: "Cash on Delivery",
+        paymentMethod,
+        displayCurrency: currency,
+        exchangeRate: isInternationalDisplay ? pkrToUsdRate : undefined,
+        customerCountry: countryCode,
         customer: {
           fullName: String(formData.get("fullName") || user.name || ""),
           email: String(formData.get("email") || user.email || ""),
@@ -79,6 +122,9 @@ export default function CheckoutView() {
     }
   }
 
+  const paysOnDelivery =
+    isPakistanVisitor && paymentChoice === "cod";
+
   return (
     <div className="pb-16 pt-8 sm:pt-10">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -88,7 +134,9 @@ export default function CheckoutView() {
           </p>
           <h1 className="mt-3 text-4xl font-semibold text-white">Complete your order</h1>
           <p className="mt-3 text-sm text-zinc-400">
-            Pehle sign in karein, phir delivery details fill karein. Payment delivery par hogi.
+            {isPakistanVisitor
+              ? "Sign in, add delivery details, then choose cash on delivery or online payment."
+              : "Sign in and add delivery details. Online payment is required for orders outside Pakistan."}
           </p>
         </Reveal>
 
@@ -199,23 +247,89 @@ export default function CheckoutView() {
             <div className="space-y-6">
               <Reveal delay={100}>
                 <div className="rounded-[1.75rem] border border-white/[0.08] bg-white/[0.03] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.25)]">
+                  {hasPreOrderLines ? (
+                    <div className="mb-6 rounded-2xl border border-amber-500/25 bg-amber-500/10 p-4">
+                      <p className="text-sm font-semibold text-amber-100">
+                        {PRE_ORDER_CHECKOUT_TITLE}
+                      </p>
+                      <p className="mt-2 text-sm leading-6 text-zinc-400">
+                        {isPakistanVisitor
+                          ? PRE_ORDER_CHECKOUT_BODY
+                          : PRE_ORDER_CHECKOUT_BODY_INTERNATIONAL}
+                      </p>
+                      {fulfillmentKind === "mixed" ? (
+                        <p className="mt-3 text-xs leading-5 text-zinc-500">
+                          {PRE_ORDER_MIXED_CART}
+                        </p>
+                      ) : null}
+                      <label className="mt-4 flex cursor-pointer items-start gap-3">
+                        <input
+                          type="checkbox"
+                          checked={preOrderAck}
+                          onChange={(event) => setPreOrderAck(event.target.checked)}
+                          className="mt-1 accent-amber-400"
+                          disabled={!isAuthenticated}
+                        />
+                        <span className="text-sm leading-6 text-zinc-300">
+                          {isPakistanVisitor
+                            ? PRE_ORDER_CHECKOUT_ACK
+                            : PRE_ORDER_CHECKOUT_ACK_ONLINE}
+                        </span>
+                      </label>
+                    </div>
+                  ) : null}
+
                   <h2 className="text-lg font-semibold text-white">Payment method</h2>
-                  <label className="mt-5 flex cursor-pointer items-start gap-4 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 p-4">
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="cod"
-                      defaultChecked
-                      className="mt-1 accent-emerald-400"
-                      disabled={!isAuthenticated}
-                    />
-                    <span>
-                      <span className="block font-semibold text-white">Cash on Delivery</span>
-                      <span className="mt-1 block text-sm leading-6 text-zinc-400">
-                        Pay with cash when your order arrives at your doorstep.
+                  <div className="mt-5 space-y-3">
+                    {isPakistanVisitor ? (
+                      <label className="flex cursor-pointer items-start gap-4 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 p-4">
+                        <input
+                          type="radio"
+                          name="paymentMethod"
+                          value="cod"
+                          checked={paymentChoice === "cod"}
+                          onChange={() => setPaymentChoice("cod")}
+                          className="mt-1 accent-emerald-400"
+                          disabled={!isAuthenticated}
+                        />
+                        <span>
+                          <span className="block font-semibold text-white">
+                            {PAYMENT_CHECKOUT_TITLE}
+                          </span>
+                          <span className="mt-1 block text-sm leading-6 text-zinc-400">
+                            {PAYMENT_CHECKOUT_BODY}
+                          </span>
+                        </span>
+                      </label>
+                    ) : null}
+
+                    <label
+                      className={[
+                        "flex cursor-pointer items-start gap-4 rounded-2xl border p-4",
+                        isPakistanVisitor
+                          ? "border-sky-500/25 bg-sky-500/10"
+                          : "border-sky-500/30 bg-sky-500/15",
+                      ].join(" ")}
+                    >
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="online"
+                        checked={paymentChoice === "online"}
+                        onChange={() => setPaymentChoice("online")}
+                        className="mt-1 accent-sky-400"
+                        disabled={!isAuthenticated}
+                      />
+                      <span>
+                        <span className="block font-semibold text-white">
+                          {PAYMENT_ONLINE_CHECKOUT_TITLE}
+                        </span>
+                        <span className="mt-1 block text-sm leading-6 text-zinc-400">
+                          {PAYMENT_ONLINE_CHECKOUT_BODY}
+                        </span>
                       </span>
-                    </span>
-                  </label>
+                    </label>
+                  </div>
                 </div>
               </Reveal>
 
@@ -237,7 +351,15 @@ export default function CheckoutView() {
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-medium text-white">{item.name}</p>
-                          <p className="text-xs text-zinc-500">Qty {item.quantity}</p>
+                          <p className="text-xs text-zinc-500">
+                            Qty {item.quantity}
+                            {isCartLinePreOrder(item) ? " · Pre-order" : ""}
+                          </p>
+                          {isCartLinePreOrder(item) && formatExpectedShipFromLine(item) ? (
+                            <p className="text-xs text-amber-200/90">
+                              Est. ship: {formatExpectedShipFromLine(item)}
+                            </p>
+                          ) : null}
                         </div>
                         <p className="text-sm font-semibold text-white">
                           {formatPrice(item.price * item.quantity)}
@@ -257,8 +379,13 @@ export default function CheckoutView() {
                         {deliveryTotal > 0 ? formatPrice(deliveryTotal) : "Free"}
                       </span>
                     </div>
+                    {deliveryNote ? (
+                      <p className="mt-2 text-xs leading-5 text-zinc-500">{deliveryNote}</p>
+                    ) : null}
                     <div className="mt-4 flex items-center justify-between">
-                      <span className="font-medium text-white">Total due on delivery</span>
+                      <span className="font-medium text-white">
+                        {paysOnDelivery ? "Total due on delivery" : "Total to pay"}
+                      </span>
                       <span className="text-2xl font-bold text-white">{formatPrice(total)}</span>
                     </div>
                   </div>

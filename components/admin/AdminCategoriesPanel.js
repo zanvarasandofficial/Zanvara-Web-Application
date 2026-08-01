@@ -249,7 +249,7 @@ export default function AdminCategoriesPanel() {
                   required
                   value={form.name}
                   onChange={(event) => setForm({ name: event.target.value })}
-                  placeholder="Electronics"
+                  placeholder="Kinetic Tables"
                   className={adminInputClassName}
                 />
               </label>

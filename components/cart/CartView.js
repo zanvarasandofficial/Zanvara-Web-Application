@@ -4,12 +4,38 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "../../context/CartContext";
 import { useToast } from "../../context/ToastContext";
+import { USD_FOOTER_NOTE } from "../../lib/content/international-pricing";
+import { useCurrency } from "../../context/CurrencyContext";
 import { formatPrice } from "../../lib/data/products";
 import { formatDeliveryLabel } from "../../lib/products/delivery";
+import {
+  formatExpectedShipFromLine,
+  isCartLinePreOrder,
+} from "../../lib/products/fulfillment";
+import { PAYMENT_CART_NOTE_PK } from "../../lib/content/store-policy";
+import {
+  PAYMENT_CART_NOTE_ONLINE,
+} from "../../lib/payments/checkout";
+import {
+  PRE_ORDER_CART_CHIP,
+  PRE_ORDER_CART_NOTE,
+  PRE_ORDER_MIXED_CART,
+  PRE_ORDER_SLOTS_LEFT,
+} from "../../lib/content/pre-order";
 import Reveal from "../ui/Reveal";
 
 export default function CartView() {
-  const { items, subtotal, deliveryTotal, total, updateQuantity, removeItem } = useCart();
+  const {
+    items,
+    subtotal,
+    deliveryTotal,
+    deliveryNote,
+    fulfillmentKind,
+    total,
+    updateQuantity,
+    removeItem,
+  } = useCart();
+  const { isInternationalDisplay, isPakistanVisitor } = useCurrency();
   const { showToast } = useToast();
 
   if (items.length === 0) {
@@ -54,6 +80,8 @@ export default function CartView() {
             {items.map((item, index) => {
               const itemDeliveryLabel = formatDeliveryLabel(item);
               const itemDeliveryIsFree = itemDeliveryLabel === "Free";
+              const isPreOrderLine = isCartLinePreOrder(item);
+              const expectedShip = isPreOrderLine ? formatExpectedShipFromLine(item) : null;
 
               return (
               <Reveal key={item.productId} delay={index * 40}>
@@ -81,17 +109,26 @@ export default function CartView() {
                           {item.name}
                         </Link>
                         <p className="mt-1 text-sm text-zinc-500">
-                          {item.stock} available in stock
+                          {isPreOrderLine
+                            ? PRE_ORDER_SLOTS_LEFT(item.stock)
+                            : `${item.stock} available in stock`}
                         </p>
+                        {expectedShip ? (
+                          <p className="mt-1 text-xs text-amber-200/90">
+                            Est. ship: {expectedShip}
+                          </p>
+                        ) : null}
                         <p
                           className={[
                             "mt-2 inline-flex rounded-full px-2.5 py-1 text-xs font-medium",
-                            itemDeliveryIsFree
-                              ? "border border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
-                              : "border border-amber-500/20 bg-amber-500/10 text-amber-200",
+                            isPreOrderLine
+                              ? "border border-amber-500/25 bg-amber-500/10 text-amber-200"
+                              : itemDeliveryIsFree
+                                ? "border border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
+                                : "border border-amber-500/20 bg-amber-500/10 text-amber-200",
                           ].join(" ")}
                         >
-                          Delivery: {itemDeliveryLabel}
+                          {isPreOrderLine ? PRE_ORDER_CART_CHIP : `Delivery: ${itemDeliveryLabel}`}
                         </p>
                       </div>
                       <button
@@ -162,6 +199,16 @@ export default function CartView() {
             <aside className="h-fit rounded-[1.75rem] border border-white/[0.08] bg-white/[0.03] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.25)]">
               <h2 className="text-lg font-semibold text-white">Order Summary</h2>
 
+              {fulfillmentKind === "pre_order" || fulfillmentKind === "mixed" ? (
+                <div className="mt-4 rounded-2xl border border-amber-500/20 bg-amber-500/10 p-4">
+                  <p className="text-sm font-semibold text-amber-100">Pre-order in cart</p>
+                  <p className="mt-2 text-xs leading-5 text-zinc-400">{PRE_ORDER_CART_NOTE}</p>
+                  {fulfillmentKind === "mixed" ? (
+                    <p className="mt-2 text-xs leading-5 text-zinc-500">{PRE_ORDER_MIXED_CART}</p>
+                  ) : null}
+                </div>
+              ) : null}
+
               <div className="mt-6 space-y-3 text-sm">
                 <div className="flex items-center justify-between text-zinc-400">
                   <span>Subtotal</span>
@@ -173,6 +220,9 @@ export default function CartView() {
                     {deliveryTotal > 0 ? formatPrice(deliveryTotal) : "Free"}
                   </span>
                 </div>
+                {deliveryNote ? (
+                  <p className="text-xs leading-5 text-zinc-500">{deliveryNote}</p>
+                ) : null}
                 <div className="border-t border-white/[0.06] pt-3">
                   <div className="flex items-center justify-between">
                     <span className="font-medium text-white">Total</span>
@@ -181,8 +231,13 @@ export default function CartView() {
                     </span>
                   </div>
                   <p className="mt-2 text-xs text-zinc-500">
-                    Cash on delivery — pay when your order arrives.
+                    {isPakistanVisitor
+                      ? PAYMENT_CART_NOTE_PK
+                      : PAYMENT_CART_NOTE_ONLINE}
                   </p>
+                  {isInternationalDisplay ? (
+                    <p className="mt-2 text-xs leading-5 text-zinc-500">{USD_FOOTER_NOTE}</p>
+                  ) : null}
                 </div>
               </div>
 

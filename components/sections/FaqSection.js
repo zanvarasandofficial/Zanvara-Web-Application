@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { faqItems } from "../../lib/data/faqs";
+import { useStorePolicy } from "../../context/StorePolicyContext";
 import SectionHeading from "../ui/SectionHeading";
 import Reveal from "../ui/Reveal";
 
 export default function FaqSection() {
   const [openId, setOpenId] = useState(faqItems[0]?.id ?? null);
+  const { faqDelivery } = useStorePolicy();
 
   return (
     <section className="relative overflow-hidden border-t border-[#2A2A2A] bg-[#111111] py-16 sm:py-20 lg:py-24">
@@ -20,7 +22,7 @@ export default function FaqSection() {
           <SectionHeading
             eyebrow="Support"
             title="Frequently Asked Questions"
-            subtitle="Quick answers about shopping, payments, delivery, and returns on Zanvara."
+            subtitle="Quick answers about shopping, delivery, device setup, and returns on Zanvara."
             align="center"
           />
         </Reveal>
@@ -28,6 +30,8 @@ export default function FaqSection() {
         <div className="space-y-3">
           {faqItems.map((item, index) => {
             const isOpen = openId === item.id;
+            const answerText =
+              item.answerKey === "delivery" ? faqDelivery : item.answer;
 
             return (
               <Reveal key={item.id} delay={index * 60}>
@@ -76,9 +80,17 @@ export default function FaqSection() {
                     ].join(" ")}
                   >
                     <div className="overflow-hidden">
-                      <p className="px-5 pb-5 text-sm leading-7 text-[#A3A3A3] sm:px-6 sm:text-base">
-                        {item.answer}
-                      </p>
+                      {item.steps?.length ? (
+                        <ol className="list-decimal space-y-2.5 px-5 pb-5 pl-10 text-sm leading-7 text-[#A3A3A3] sm:px-6 sm:pl-11 sm:text-base">
+                          {item.steps.map((step, stepIndex) => (
+                            <li key={stepIndex}>{step}</li>
+                          ))}
+                        </ol>
+                      ) : (
+                        <p className="px-5 pb-5 text-sm leading-7 text-[#A3A3A3] sm:px-6 sm:text-base">
+                          {answerText}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>

@@ -7,11 +7,15 @@ import OrderDeliveredSummary from "../orders/OrderDeliveredSummary";
 import OrderTrackingTimeline from "../orders/OrderTrackingTimeline";
 import { useCustomerAuth } from "../../context/CustomerAuthContext";
 import { fetchMyOrders } from "../../lib/api/orders";
-import { formatPrice } from "../../lib/data/products";
+import { formatMoney } from "../../lib/money/format";
+import { CURRENCY } from "../../lib/money/constants";
 import {
   getOrderStatusLabel,
   isOrderDelivered,
+  isPreOrderFulfillment,
 } from "../../lib/orders/order-status";
+import { formatExpectedShipFromLine, isCartLinePreOrder } from "../../lib/products/fulfillment";
+import { PRE_ORDER_CART_CHIP } from "../../lib/content/pre-order";
 import {
   fetchOrderItemReviewStatus,
   isOrderItemReviewed,
@@ -22,6 +26,9 @@ import ReviewSubmitModal from "../reviews/ReviewSubmitModal";
 
 const statusStyles = {
   pending: "border-amber-500/20 bg-amber-500/10 text-amber-300",
+  pre_order_confirmed: "border-amber-500/25 bg-amber-500/10 text-amber-200",
+  in_production: "border-orange-500/20 bg-orange-500/10 text-orange-200",
+  ready_to_ship: "border-sky-500/20 bg-sky-500/10 text-sky-300",
   confirmed: "border-sky-500/20 bg-sky-500/10 text-sky-300",
   shipped: "border-[#FFB347]/25 bg-[#FFB347]/10 text-[#FFD9A6]",
   delivered: "border-emerald-500/20 bg-emerald-500/10 text-emerald-300",
@@ -29,9 +36,13 @@ const statusStyles = {
 };
 
 function OrderStatusPill({ status }) {
+  const key = String(status ?? "pending")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "_");
   return (
     <span
-      className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${statusStyles[status] || statusStyles.pending}`}
+      className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${statusStyles[key] || statusStyles.pending}`}
     >
       {getOrderStatusLabel(status)}
     </span>
@@ -172,6 +183,12 @@ export default function MyOrdersView() {
             <div className="mt-10 space-y-4">
               {orders.map((order, index) => {
                 const delivered = isOrderDelivered(order.status);
+                const preOrderFlow = isPreOrderFulfillment(order.fulfillmentKind);
+                const orderCurrency =
+                  order.displayCurrency === CURRENCY.USD ? CURRENCY.USD : CURRENCY.PKR;
+                const orderRate = order.exchangeRate ?? undefined;
+                const formatOrderMoney = (amount) =>
+                  formatMoney(amount, { currency: orderCurrency, rate: orderRate });
 
                 return (
                   <Reveal key={order.id} delay={index * 50}>
@@ -188,6 +205,7 @@ export default function MyOrdersView() {
                           <p className="font-semibold text-white">{order.id}</p>
                           <p className="mt-1 text-sm text-zinc-500">
                             {new Date(order.createdAt).toLocaleDateString("en-PK")}
+                            {preOrderFlow ? " · Pre-order tracking" : ""}
                           </p>
                         </div>
                         <OrderStatusPill status={order.status} />
@@ -199,6 +217,7 @@ export default function MyOrdersView() {
                         <div className="mt-6">
                           <OrderTrackingTimeline
                             status={order.status}
+                            fulfillmentKind={order.fulfillmentKind ?? "standard"}
                             variant="dark"
                             compact
                           />
@@ -213,6 +232,10 @@ export default function MyOrdersView() {
                             productId,
                             reviewStatusMap,
                           );
+                          const preOrderLine = isCartLinePreOrder(item);
+                          const expectedShip = preOrderLine
+                            ? formatExpectedShipFromLine(item)
+                            : null;
 
                           return (
                             <div
@@ -222,10 +245,20 @@ export default function MyOrdersView() {
                               <div>
                                 <p className="font-medium text-white">{item.name}</p>
                                 <p className="text-sm text-zinc-500">Qty {item.quantity}</p>
+                                {preOrderLine ? (
+                                  <span className="mt-1 inline-flex rounded-full border border-amber-500/25 bg-amber-500/10 px-2 py-0.5 text-[11px] font-semibold text-amber-200">
+                                    {PRE_ORDER_CART_CHIP}
+                                  </span>
+                                ) : null}
+                                {expectedShip ? (
+                                  <p className="mt-1 text-xs text-amber-200/90">
+                                    Est. ship: {expectedShip}
+                                  </p>
+                                ) : null}
                               </div>
                               <div className="flex items-center gap-3">
                                 <span className="text-sm font-semibold text-white">
-                                  {formatPrice(item.price * item.quantity)}
+                                  {formatOrderMoney(item.price * item.quantity)}
                                 </span>
                                 {delivered && reviewed ? (
                                   <span className="text-xs font-medium text-emerald-300">

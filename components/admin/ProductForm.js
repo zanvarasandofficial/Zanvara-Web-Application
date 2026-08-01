@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { productCategories, formatPrice, getDiscountPercent } from "../../lib/products/pricing";
+import { formatUsdAmount } from "../../lib/money/format";
 import { adminFetch, uploadProductImage } from "../../lib/api/admin-client";
 import {
   adminInputClassName,
@@ -19,16 +20,127 @@ const emptyForm = {
   name: "",
   description: "",
   detailsHtml: "",
-  category: productCategories[0] ?? "Electronics",
+  specsHtml: "",
+  whatsIncludedHtml: "",
+  shippingReturnsHtml: "",
+  category: productCategories[0] ?? "KINETIC SAND TABLES",
   originalPrice: "",
   priceAfterDiscount: "",
+  originalPriceUsd: "",
+  priceAfterDiscountUsd: "",
   stock: "",
   badge: "",
   status: "PUBLISHED",
   isPopular: false,
   deliveryType: "FREE",
   deliveryCharge: "",
+  isComingSoon: false,
+  comingSoonMode: "days",
+  comingSoonDays: "7",
+  comingSoonAt: "",
+  isPreOrder: false,
+  preOrderCapacity: "25",
+  expectedShipMode: "days",
+  expectedShipDays: "21",
+  expectedShipAt: "",
+  expectedShipNote: "",
 };
+
+function buildPreOrderPayload(form) {
+  if (!form.isPreOrder) {
+    return { isPreOrder: false };
+  }
+
+  const capacity = Number(form.preOrderCapacity);
+  if (!Number.isFinite(capacity) || capacity < 1) {
+    throw new Error("Enter pre-order capacity (minimum 1 unit).");
+  }
+
+  let expectedShipAt;
+  if (form.expectedShipMode === "days") {
+    const days = Number(form.expectedShipDays);
+    if (!Number.isFinite(days) || days < 1) {
+      throw new Error("Enter expected ship timeline in days (1 or more).");
+    }
+    expectedShipAt = new Date(Date.now() + days * 86400000).toISOString();
+  } else if (form.expectedShipAt) {
+    const shipDate = new Date(form.expectedShipAt);
+    if (Number.isNaN(shipDate.getTime())) {
+      throw new Error("Invalid expected ship date.");
+    }
+    expectedShipAt = shipDate.toISOString();
+  }
+
+  const expectedShipNote = form.expectedShipNote.trim() || null;
+  if (!expectedShipAt && !expectedShipNote) {
+    throw new Error("Add expected ship date or a short ship window note.");
+  }
+
+  return {
+    isPreOrder: true,
+    preOrderCapacity: capacity,
+    expectedShipAt,
+    expectedShipNote,
+  };
+}
+
+function buildFulfillmentPayload(form) {
+  if (form.isComingSoon) {
+    return { ...buildComingSoonPayload(form), isPreOrder: false };
+  }
+
+  if (form.isPreOrder) {
+    return { ...buildPreOrderPayload(form), isComingSoon: false };
+  }
+
+  return { isComingSoon: false, isPreOrder: false };
+}
+
+function toDatetimeLocalValue(iso) {
+  if (!iso) {
+    return "";
+  }
+
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  const pad = (value) => String(value).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function buildComingSoonPayload(form) {
+  if (!form.isComingSoon) {
+    return { isComingSoon: false };
+  }
+
+  if (form.comingSoonMode === "days") {
+    const days = Number(form.comingSoonDays);
+    if (!Number.isFinite(days) || days < 1) {
+      throw new Error("Enter how many days until launch (1 or more).");
+    }
+
+    return {
+      isComingSoon: true,
+      availableAt: new Date(Date.now() + days * 86400000).toISOString(),
+    };
+  }
+
+  if (!form.comingSoonAt) {
+    throw new Error("Pick launch date and time.");
+  }
+
+  const launchDate = new Date(form.comingSoonAt);
+  if (Number.isNaN(launchDate.getTime())) {
+    throw new Error("Invalid launch date.");
+  }
+
+  return {
+    isComingSoon: true,
+    availableAt: launchDate.toISOString(),
+  };
+}
 
 function mapInitialValues(product) {
   if (!product) return emptyForm;
@@ -37,9 +149,14 @@ function mapInitialValues(product) {
     name: product.name ?? "",
     description: product.description ?? "",
     detailsHtml: product.detailsHtml ?? "",
+    specsHtml: product.specsHtml ?? "",
+    whatsIncludedHtml: product.whatsIncludedHtml ?? "",
+    shippingReturnsHtml: product.shippingReturnsHtml ?? "",
     category: product.category ?? productCategories[0],
     originalPrice: product.originalPrice?.toString() ?? "",
     priceAfterDiscount: product.priceAfterDiscount?.toString() ?? "",
+    originalPriceUsd: product.originalPriceUsd?.toString() ?? "",
+    priceAfterDiscountUsd: product.priceAfterDiscountUsd?.toString() ?? "",
     stock: product.stock?.toString() ?? "",
     badge: product.badge ?? "",
     status: product.status ?? "PUBLISHED",
@@ -49,7 +166,42 @@ function mapInitialValues(product) {
       product.deliveryType === "CHARGED" && product.deliveryCharge != null
         ? product.deliveryCharge.toString()
         : "",
+    isComingSoon: Boolean(product.isComingSoon),
+    comingSoonMode: product.availableAt ? "datetime" : "days",
+    comingSoonDays: "7",
+    comingSoonAt: toDatetimeLocalValue(product.availableAt),
+    isPreOrder: Boolean(product.isPreOrder),
+    preOrderCapacity: product.preOrderCapacity?.toString() ?? "25",
+    expectedShipMode: product.expectedShipAt ? "datetime" : "days",
+    expectedShipDays: "21",
+    expectedShipAt: toDatetimeLocalValue(product.expectedShipAt),
+    expectedShipNote: product.expectedShipNote ?? "",
   };
+}
+
+function isValidHttpUrl(value) {
+  if (!value || typeof value !== "string") return false;
+
+  try {
+    const url = new URL(value.trim());
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+/** Omit empty accordion fields so older API builds still accept product saves. */
+function buildAccordionPayload(form) {
+  const specsHtml = form.specsHtml.trim() || null;
+  const whatsIncludedHtml = form.whatsIncludedHtml.trim() || null;
+  const shippingReturnsHtml = form.shippingReturnsHtml.trim() || null;
+  const hasAny = specsHtml || whatsIncludedHtml || shippingReturnsHtml;
+
+  if (!hasAny) {
+    return {};
+  }
+
+  return { specsHtml, whatsIncludedHtml, shippingReturnsHtml };
 }
 
 function mapGalleryFromProduct(product) {
@@ -118,7 +270,12 @@ export default function ProductForm({
     async function loadCategories() {
       try {
         const data = await adminFetch("/admin/categories");
-        const names = Array.isArray(data) ? data.map((item) => item.name).filter(Boolean) : [];
+        const names = Array.isArray(data)
+          ? data
+              .filter((item) => item.isActive !== false)
+              .map((item) => item.name)
+              .filter(Boolean)
+          : [];
 
         if (!active || !names.length) return;
 
@@ -162,7 +319,16 @@ export default function ProductForm({
   }, [form.originalPrice, form.priceAfterDiscount]);
 
   function updateField(field, value) {
-    setForm((current) => ({ ...current, [field]: value }));
+    setForm((current) => {
+      const next = { ...current, [field]: value };
+      if (field === "isComingSoon" && value) {
+        next.isPreOrder = false;
+      }
+      if (field === "isPreOrder" && value) {
+        next.isComingSoon = false;
+      }
+      return next;
+    });
   }
 
   function handleAddGalleryImages(event) {
@@ -220,6 +386,28 @@ export default function ProductForm({
         throw new Error("Price after discount must be lower than original price.");
       }
 
+      const originalPriceUsd = form.originalPriceUsd.trim()
+        ? Number(form.originalPriceUsd)
+        : null;
+      const priceAfterDiscountUsd = form.priceAfterDiscountUsd.trim()
+        ? Number(form.priceAfterDiscountUsd)
+        : null;
+
+      if (originalPriceUsd != null && originalPriceUsd <= 0) {
+        throw new Error("Original USD price must be greater than zero.");
+      }
+
+      if (priceAfterDiscountUsd != null && originalPriceUsd == null) {
+        throw new Error("Enter original USD price when setting a USD sale price.");
+      }
+
+      if (
+        priceAfterDiscountUsd != null &&
+        (priceAfterDiscountUsd <= 0 || priceAfterDiscountUsd >= originalPriceUsd)
+      ) {
+        throw new Error("USD sale price must be lower than original USD price.");
+      }
+
       const deliveryType = form.deliveryType;
       const deliveryCharge =
         deliveryType === "CHARGED" && form.deliveryCharge
@@ -262,25 +450,31 @@ export default function ProductForm({
         }),
       );
 
+      const galleryPairs = uploadedGallery.filter((item) => isValidHttpUrl(item.url));
+
       const payload = {
         name: form.name.trim(),
         description: form.description.trim() || undefined,
         detailsHtml: form.detailsHtml.trim() || null,
+        ...buildAccordionPayload(form),
         category: form.category,
         originalPrice,
         priceAfterDiscount,
+        originalPriceUsd,
+        priceAfterDiscountUsd,
         badge: form.badge.trim() || null,
         imageUrl: nextMainImageUrl,
-        hoverImageUrl: nextHoverImageUrl || undefined,
+        hoverImageUrl: isValidHttpUrl(nextHoverImageUrl) ? nextHoverImageUrl.trim() : undefined,
         imagePublicId: nextMainPublicId || undefined,
         hoverImagePublicId: nextHoverPublicId || undefined,
-        galleryImageUrls: uploadedGallery.map((item) => item.url),
-        galleryImagePublicIds: uploadedGallery.map((item) => item.publicId),
+        galleryImageUrls: galleryPairs.map((item) => item.url.trim()),
+        galleryImagePublicIds: galleryPairs.map((item) => item.publicId || ""),
         stock: Number(form.stock || 0),
         status: form.status,
         isPopular: form.isPopular,
         deliveryType,
         deliveryCharge,
+        ...buildFulfillmentPayload(form),
       };
 
       if (mode === "create") {
@@ -364,6 +558,41 @@ export default function ProductForm({
                   placeholder="Material, sizing, warranty, features..."
                 />
               </div>
+
+              <div className="rounded-xl border border-slate-100 bg-slate-50/80 p-5">
+                <h3 className="text-sm font-semibold text-slate-900">
+                  Product page sections (accordion)
+                </h3>
+                <p className="mt-1 text-sm text-slate-500">
+                  Expandable sections below add to cart. Leave empty to hide a section.
+                </p>
+                <div className="mt-5 space-y-5">
+                  <div className="flex flex-col gap-2">
+                    <span className={adminLabelClassName}>Specs</span>
+                    <RichTextEditor
+                      value={form.specsHtml}
+                      onChange={(html) => updateField("specsHtml", html)}
+                      placeholder="Dimensions, weight, power, materials..."
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <span className={adminLabelClassName}>Shipping and Returns</span>
+                    <RichTextEditor
+                      value={form.shippingReturnsHtml}
+                      onChange={(html) => updateField("shippingReturnsHtml", html)}
+                      placeholder="Delivery times, return policy..."
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <span className={adminLabelClassName}>What&apos;s Included?</span>
+                    <RichTextEditor
+                      value={form.whatsIncludedHtml}
+                      onChange={(html) => updateField("whatsIncludedHtml", html)}
+                      placeholder="Table, power adapter, sand, manual..."
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </section>
 
@@ -391,6 +620,42 @@ export default function ProductForm({
                   value={form.priceAfterDiscount}
                   onChange={(event) => updateField("priceAfterDiscount", event.target.value)}
                   placeholder="Leave empty if no discount"
+                  className={adminInputClassName}
+                />
+              </label>
+
+              <label className="flex flex-col gap-2 sm:col-span-2">
+                <span className={adminLabelClassName}>International pricing (USD)</span>
+                <p className="text-xs leading-5 text-slate-500">
+                  Optional. When set, visitors outside Pakistan see these dollar amounts
+                  instead of auto-converting from PKR.
+                </p>
+              </label>
+
+              <label className="flex flex-col gap-2">
+                <span className={adminLabelClassName}>Original price (USD)</span>
+                <input
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={form.originalPriceUsd}
+                  onChange={(event) => updateField("originalPriceUsd", event.target.value)}
+                  placeholder="e.g. 299"
+                  className={adminInputClassName}
+                />
+              </label>
+
+              <label className="flex flex-col gap-2">
+                <span className={adminLabelClassName}>Price after discount (USD)</span>
+                <input
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={form.priceAfterDiscountUsd}
+                  onChange={(event) =>
+                    updateField("priceAfterDiscountUsd", event.target.value)
+                  }
+                  placeholder="Optional sale price in USD"
                   className={adminInputClassName}
                 />
               </label>
@@ -444,6 +709,207 @@ export default function ProductForm({
                   />
                 </label>
               ) : null}
+
+              <div className="sm:col-span-2 rounded-xl border border-violet-200 bg-violet-50/60 p-4">
+                <label className="flex items-center justify-between gap-4">
+                  <span className="text-sm font-medium text-slate-800">
+                    Coming soon (live countdown on storefront)
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked={form.isComingSoon}
+                    onChange={(event) => updateField("isComingSoon", event.target.checked)}
+                    className="h-4 w-4 accent-violet-600"
+                  />
+                </label>
+
+                {form.isComingSoon ? (
+                  <div className="mt-4 space-y-4">
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => updateField("comingSoonMode", "days")}
+                        className={[
+                          "rounded-lg px-3 py-2 text-xs font-semibold transition",
+                          form.comingSoonMode === "days"
+                            ? "bg-violet-600 text-white"
+                            : "border border-violet-200 bg-white text-slate-600",
+                        ].join(" ")}
+                      >
+                        Days from save
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => updateField("comingSoonMode", "datetime")}
+                        className={[
+                          "rounded-lg px-3 py-2 text-xs font-semibold transition",
+                          form.comingSoonMode === "datetime"
+                            ? "bg-violet-600 text-white"
+                            : "border border-violet-200 bg-white text-slate-600",
+                        ].join(" ")}
+                      >
+                        Exact date & time
+                      </button>
+                    </div>
+
+                    {form.comingSoonMode === "days" ? (
+                      <label className="flex max-w-xs flex-col gap-2">
+                        <span className={adminLabelClassName}>Launch in (days)</span>
+                        <input
+                          type="number"
+                          min="1"
+                          max="365"
+                          value={form.comingSoonDays}
+                          onChange={(event) =>
+                            updateField("comingSoonDays", event.target.value)
+                          }
+                          className={adminInputClassName}
+                        />
+                        <span className="text-xs text-slate-500">
+                          Countdown starts when you save — e.g. 14 days from now.
+                        </span>
+                      </label>
+                    ) : (
+                      <label className="flex max-w-md flex-col gap-2">
+                        <span className={adminLabelClassName}>Launch date & time</span>
+                        <input
+                          type="datetime-local"
+                          value={form.comingSoonAt}
+                          onChange={(event) =>
+                            updateField("comingSoonAt", event.target.value)
+                          }
+                          className={adminInputClassName}
+                        />
+                        <span className="text-xs text-slate-500">
+                          Uses your browser local time; customers see a live countdown until
+                          then.
+                        </span>
+                      </label>
+                    )}
+                  </div>
+                ) : (
+                  <p className="mt-3 text-xs leading-5 text-slate-500">
+                    Enable to show a live launch timer and block Add to cart until the countdown
+                    ends.
+                  </p>
+                )}
+              </div>
+
+              <div className="sm:col-span-2 rounded-xl border border-amber-200 bg-amber-50/70 p-4">
+                <label className="flex items-center justify-between gap-4">
+                  <span className="text-sm font-medium text-slate-800">
+                    Pre-order (customers can order before stock arrives)
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked={form.isPreOrder}
+                    onChange={(event) => updateField("isPreOrder", event.target.checked)}
+                    className="h-4 w-4 accent-amber-600"
+                  />
+                </label>
+
+                {form.isPreOrder ? (
+                  <div className="mt-4 space-y-4">
+                    <label className="flex max-w-xs flex-col gap-2">
+                      <span className={adminLabelClassName}>Pre-order capacity (units)</span>
+                      <input
+                        type="number"
+                        min="1"
+                        value={form.preOrderCapacity}
+                        onChange={(event) =>
+                          updateField("preOrderCapacity", event.target.value)
+                        }
+                        className={adminInputClassName}
+                      />
+                      <span className="text-xs text-slate-500">
+                        Max tables customers can pre-order. Reserved automatically on checkout.
+                      </span>
+                    </label>
+
+                    {productId && initialValues?.preOrderReserved ? (
+                      <p className="text-xs font-medium text-amber-800">
+                        Reserved so far: {initialValues.preOrderReserved} /{" "}
+                        {initialValues.preOrderCapacity ?? form.preOrderCapacity}
+                      </p>
+                    ) : null}
+
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => updateField("expectedShipMode", "days")}
+                        className={[
+                          "rounded-lg px-3 py-2 text-xs font-semibold transition",
+                          form.expectedShipMode === "days"
+                            ? "bg-amber-600 text-white"
+                            : "border border-amber-200 bg-white text-slate-600",
+                        ].join(" ")}
+                      >
+                        Ship in (days from save)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => updateField("expectedShipMode", "datetime")}
+                        className={[
+                          "rounded-lg px-3 py-2 text-xs font-semibold transition",
+                          form.expectedShipMode === "datetime"
+                            ? "bg-amber-600 text-white"
+                            : "border border-amber-200 bg-white text-slate-600",
+                        ].join(" ")}
+                      >
+                        Exact ship date
+                      </button>
+                    </div>
+
+                    {form.expectedShipMode === "days" ? (
+                      <label className="flex max-w-xs flex-col gap-2">
+                        <span className={adminLabelClassName}>Expected ship in (days)</span>
+                        <input
+                          type="number"
+                          min="1"
+                          max="365"
+                          value={form.expectedShipDays}
+                          onChange={(event) =>
+                            updateField("expectedShipDays", event.target.value)
+                          }
+                          className={adminInputClassName}
+                        />
+                      </label>
+                    ) : (
+                      <label className="flex max-w-md flex-col gap-2">
+                        <span className={adminLabelClassName}>Expected ship date</span>
+                        <input
+                          type="datetime-local"
+                          value={form.expectedShipAt}
+                          onChange={(event) =>
+                            updateField("expectedShipAt", event.target.value)
+                          }
+                          className={adminInputClassName}
+                        />
+                      </label>
+                    )}
+
+                    <label className="flex flex-col gap-2">
+                      <span className={adminLabelClassName}>
+                        Ship window note (optional if date set)
+                      </span>
+                      <input
+                        type="text"
+                        value={form.expectedShipNote}
+                        onChange={(event) =>
+                          updateField("expectedShipNote", event.target.value)
+                        }
+                        placeholder="e.g. Ships in 4–6 weeks after pre-order"
+                        className={adminInputClassName}
+                      />
+                    </label>
+                  </div>
+                ) : (
+                  <p className="mt-3 text-xs leading-5 text-slate-500">
+                    Use pre-order for tables in production. Customers checkout with COD; slots
+                    fill until capacity is reached.
+                  </p>
+                )}
+              </div>
             </div>
 
             <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">

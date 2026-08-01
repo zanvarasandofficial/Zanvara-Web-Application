@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import AdminPageHeader from "../../../../components/admin/AdminPageHeader";
+import StoreDeliverySettingsPanel from "../../../../components/admin/StoreDeliverySettingsPanel";
 import {
   adminInputClassName,
   adminLabelClassName,
@@ -16,7 +17,7 @@ const tabs = [
 ];
 
 export default function AdminSettingsPage() {
-  const [activeTab, setActiveTab] = useState("general");
+  const [activeTab, setActiveTab] = useState("store");
 
   return (
     <>
@@ -57,27 +58,15 @@ export default function AdminSettingsPage() {
             </label>
             <label className="flex flex-col gap-2 sm:col-span-2">
               <span className={adminLabelClassName}>Store tagline</span>
-              <input type="text" defaultValue="Modern Commerce" className={adminInputClassName} />
+              <input type="text" defaultValue="The Art of Calm" className={adminInputClassName} />
             </label>
+            <p className="sm:col-span-2 text-sm text-slate-500">
+              General fields are not saved to the database yet — use Store for delivery rules.
+            </p>
           </div>
         ) : null}
 
-        {activeTab === "store" ? (
-          <div className="grid gap-5 sm:grid-cols-2">
-            <label className="flex flex-col gap-2">
-              <span className={adminLabelClassName}>Default currency</span>
-              <input type="text" defaultValue="PKR (Rs.)" className={adminInputClassName} />
-            </label>
-            <label className="flex flex-col gap-2">
-              <span className={adminLabelClassName}>Delivery fee</span>
-              <input type="text" defaultValue="Free" className={adminInputClassName} />
-            </label>
-            <label className="flex flex-col gap-2 sm:col-span-2">
-              <span className={adminLabelClassName}>Payment methods</span>
-              <input type="text" defaultValue="Cash on Delivery" className={adminInputClassName} />
-            </label>
-          </div>
-        ) : null}
+        {activeTab === "store" ? <StoreDeliverySettingsPanel /> : null}
 
         {activeTab === "notifications" ? (
           <div className="space-y-4">
@@ -94,12 +83,15 @@ export default function AdminSettingsPage() {
                 <input type="checkbox" defaultChecked className="h-4 w-4 accent-[#FFB347]" />
               </label>
             ))}
+            <p className="text-sm text-slate-500">Notification toggles are not saved yet.</p>
           </div>
         ) : null}
 
-        <button type="button" className={`${adminPrimaryButtonClassName} mt-6`}>
-          Save Settings
-        </button>
+        {activeTab !== "store" ? (
+          <button type="button" className={`${adminPrimaryButtonClassName} mt-6`} disabled>
+            Save (coming soon)
+          </button>
+        ) : null}
       </section>
     </>
   );

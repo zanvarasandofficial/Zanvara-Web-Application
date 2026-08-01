@@ -10,6 +10,16 @@ import PromoBanner from "../sections/PromoBanner";
 import { fetchStorefrontCategories } from "../../lib/api/categories";
 import { fetchHeroSettings } from "../../lib/api/hero";
 import { fetchLandingProducts } from "../../lib/api/products";
+import { productCategories } from "../../lib/products/categories";
+
+const fallbackCategoryCards = productCategories.map((name, index) => ({
+  id: `fallback-cat-${index}`,
+  name,
+  slug: name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+  image: "",
+  count: "",
+  productCount: 0,
+}));
 
 export default function LandingPageContent() {
   const [hero, setHero] = useState(null);
@@ -40,7 +50,11 @@ export default function LandingPageContent() {
 
         setHero(heroData);
         setLandingProducts(productsData ?? { popular: [], latest: [], bestDeals: [] });
-        setCategories(Array.isArray(categoriesData) ? categoriesData : []);
+        setCategories(
+          Array.isArray(categoriesData) && categoriesData.length > 0
+            ? categoriesData
+            : fallbackCategoryCards,
+        );
 
         if (!heroData?.mediaUrl && !productsData?.latest?.length) {
           setLoadError(

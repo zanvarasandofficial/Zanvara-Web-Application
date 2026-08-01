@@ -147,7 +147,11 @@ export default function AdminOrderDetailView({ orderId }) {
               customer.
             </p>
             <div className="mt-5">
-              <OrderTrackingTimeline status={order.status} variant="light" />
+              <OrderTrackingTimeline
+                status={order.status}
+                fulfillmentKind={order.fulfillmentKind ?? "standard"}
+                variant="light"
+              />
             </div>
           </section>
 
@@ -197,6 +201,11 @@ export default function AdminOrderDetailView({ orderId }) {
                   <div className="min-w-0 flex-1">
                     <p className="font-medium text-slate-900">{item.name}</p>
                     <p className="text-sm text-slate-500">Qty {item.quantity}</p>
+                    {item.fulfillmentType === "PRE_ORDER" ? (
+                      <span className="mt-1 inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800">
+                        Pre-order
+                      </span>
+                    ) : null}
                   </div>
                   <p className="font-semibold text-slate-900">
                     {formatPrice(item.price * item.quantity)}

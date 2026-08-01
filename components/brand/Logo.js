@@ -59,12 +59,12 @@ export default function Logo() {
         </div>
       </div>
 
-      <div className="hidden min-w-0 flex-col sm:flex">
-        <span className="bg-gradient-to-r from-[#FFFFFF] via-[#FFD9A6] to-[#FFB347] bg-clip-text text-lg font-semibold tracking-tight text-transparent">
+      <div className="flex min-w-0 flex-col leading-tight">
+        <span className="bg-gradient-to-r from-[#FFFFFF] via-[#FFD9A6] to-[#FFB347] bg-clip-text text-base font-semibold tracking-tight text-transparent sm:text-lg">
           Zanvara
         </span>
-        <span className="text-[10px] font-medium uppercase tracking-[0.28em] text-[#6B6B6B] transition-colors duration-300 group-hover:text-[#A3A3A3]">
-          Modern Commerce
+        <span className="text-[10px] font-medium tracking-wide text-[#6B6B6B] transition-colors duration-300 group-hover:text-[#A3A3A3] sm:text-xs">
+          The Art of Calm
         </span>
       </div>
     </Link>

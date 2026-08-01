@@ -93,8 +93,7 @@ export default function Footer() {
             <Reveal className="lg:col-span-4" delay={0}>
               <Logo />
               <p className="mt-5 max-w-sm text-sm leading-7 text-[#A3A3A3]">
-                Curated products. Premium experience. Zanvara brings modern
-                commerce to your screen with style, speed, and trust.
+                Premium kinetic sand tables—precision, motion, and calm for your space.
               </p>
               <FooterContactIcons className="mt-6" />
             </Reveal>

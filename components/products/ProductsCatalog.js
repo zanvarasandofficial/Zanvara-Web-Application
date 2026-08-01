@@ -3,8 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { fetchAllProducts } from "../../lib/api/products";
+import { registerCatalogProducts } from "../../lib/products/live-catalog";
 import { fetchCategoryNames } from "../../lib/api/categories";
-import { sortOptions } from "../../lib/data/products";
+import { sortOptions, productCategories } from "../../lib/data/products";
 import ProductCard from "./ProductCard";
 import ProductFilters, { countActiveFilters } from "./ProductFilters";
 import { ProductGridShimmer } from "../ui/LandingShimmers";
@@ -59,10 +60,11 @@ function sortProducts(products, sort) {
 export default function ProductsCatalog() {
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get("category") ?? "all";
+  const initialQuery = searchParams.get("q") ?? "";
   const [products, setProducts] = useState([]);
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(initialQuery);
   const [category, setCategory] = useState(initialCategory);
   const [sort, setSort] = useState("featured");
   const [minPrice, setMinPrice] = useState(DEFAULT_PRICE_BOUNDS.min);
@@ -89,7 +91,10 @@ export default function ProductsCatalog() {
         if (!active) return;
 
         setProducts(data);
-        setCategoryOptions(Array.isArray(names) ? names : []);
+        registerCatalogProducts(Array.isArray(data) ? data : []);
+        setCategoryOptions(
+          Array.isArray(names) && names.length > 0 ? names : [...productCategories],
+        );
 
         if (data.length) {
           const bounds = getPriceBounds(data);
@@ -113,6 +118,10 @@ export default function ProductsCatalog() {
   useEffect(() => {
     setCategory(initialCategory);
   }, [initialCategory]);
+
+  useEffect(() => {
+    setSearch(initialQuery);
+  }, [initialQuery]);
 
   useEffect(() => {
     setCurrentPage(1);

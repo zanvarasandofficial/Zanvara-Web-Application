@@ -50,7 +50,7 @@ export default function HeroMediaBackground({ mediaType = "video", mediaUrl = ""
           muted
           playsInline
           preload="auto"
-          className="absolute inset-0 h-full w-full scale-105 object-cover"
+          className="absolute inset-0 h-full w-full object-cover sm:scale-105"
         >
           <source src={mediaUrl} type="video/mp4" />
         </video>
@@ -59,13 +59,14 @@ export default function HeroMediaBackground({ mediaType = "video", mediaUrl = ""
         <img
           src={mediaUrl}
           alt=""
-          className="absolute inset-0 h-full w-full scale-105 object-cover"
+          className="absolute inset-0 h-full w-full object-cover sm:scale-105"
         />
       )}
 
       <div className="absolute inset-0 bg-[#0A0A0A]/35" />
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0A0A0A]/15 to-[#0A0A0A]/85" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(10,10,10,0.45)_100%)]" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A0A]/92 via-[#0A0A0A]/55 to-[#0A0A0A]/25 md:from-[#0A0A0A]/75 md:via-[#0A0A0A]/35 md:to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0A0A0A]/50 via-transparent to-[#0A0A0A]/90" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_35%,rgba(10,10,10,0.5)_100%)]" />
     </div>
   );
 }

@@ -1,19 +1,44 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useCustomerAuth } from "../../../context/CustomerAuthContext";
-import { fetchCustomerProfile } from "../../../lib/api/customer-auth";
+import {
+  clearCustomerSession,
+  fetchCustomerProfile,
+} from "../../../lib/api/customer-auth";
+
+function readTokenFromCallbackUrl() {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const hash = window.location.hash?.replace(/^#/, "");
+  if (hash) {
+    const fromHash = new URLSearchParams(hash).get("token");
+    if (fromHash) {
+      return fromHash;
+    }
+  }
+
+  return new URLSearchParams(window.location.search).get("token");
+}
 
 function AuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { completeSession } = useCustomerAuth();
   const [message, setMessage] = useState("Signing you in...");
+  const handledRef = useRef(false);
 
   useEffect(() => {
     async function finishGoogleLogin() {
-      const token = searchParams.get("token");
+      if (handledRef.current) {
+        return;
+      }
+      handledRef.current = true;
+
+      const token = readTokenFromCallbackUrl();
       const redirect = searchParams.get("redirect") || "/checkout";
 
       if (!token) {
@@ -23,16 +48,26 @@ function AuthCallbackContent() {
 
       try {
         localStorage.setItem("zanvara_customer_token", token);
-        const user = await fetchCustomerProfile();
+        const user = await fetchCustomerProfile(token);
 
         if (!user) {
           throw new Error("Could not load your profile.");
         }
 
         completeSession(token, user);
+
+        if (typeof window !== "undefined") {
+          window.history.replaceState({}, "", "/auth/callback");
+        }
+
         router.replace(redirect);
-      } catch {
-        setMessage("Google sign in failed. Please try again from checkout.");
+      } catch (error) {
+        clearCustomerSession();
+        setMessage(
+          error?.message?.includes("reach Zanvara API")
+            ? error.message
+            : "Google sign in failed. Please try again from checkout.",
+        );
       }
     }
 

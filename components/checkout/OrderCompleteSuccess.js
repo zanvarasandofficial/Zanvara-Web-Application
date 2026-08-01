@@ -2,9 +2,24 @@
 
 import Link from "next/link";
 import { formatPrice } from "../../lib/data/products";
+import { PAYMENT_ORDER_SUCCESS } from "../../lib/content/store-policy";
+import {
+  isOnlinePaymentMethodName,
+  PAYMENT_ORDER_SUCCESS_ONLINE,
+} from "../../lib/payments/checkout";
+import {
+  PRE_ORDER_ORDER_SUCCESS,
+} from "../../lib/content/pre-order";
+import OrderTrackingTimeline from "../orders/OrderTrackingTimeline";
+import { isPreOrderFulfillment } from "../../lib/orders/order-status";
 import Reveal from "../ui/Reveal";
 
 export default function OrderCompleteSuccess({ order }) {
+  const showPreOrderTrack =
+    order && isPreOrderFulfillment(order.fulfillmentKind ?? "standard");
+  const paymentMessage = isOnlinePaymentMethodName(order?.paymentMethod)
+    ? PAYMENT_ORDER_SUCCESS_ONLINE
+    : PAYMENT_ORDER_SUCCESS;
   return (
     <div className="pb-16 pt-8 sm:pt-10">
       <div className="mx-auto max-w-3xl px-4 sm:px-6">
@@ -30,8 +45,8 @@ export default function OrderCompleteSuccess({ order }) {
               Thank you for shopping with Zanvara!
             </h1>
             <p className="mx-auto mt-4 max-w-xl text-base leading-8 text-zinc-300">
-              Your order has been placed successfully. We have received your details and
-              will confirm delivery soon. Payment will be collected on delivery.
+              Your order has been placed successfully. {paymentMessage}
+              {showPreOrderTrack ? ` ${PRE_ORDER_ORDER_SUCCESS}` : ""}
             </p>
 
             {order ? (
@@ -74,7 +89,20 @@ export default function OrderCompleteSuccess({ order }) {
                         >
                           <div className="min-w-0">
                             <p className="font-medium text-white">{item.name}</p>
-                            <p className="mt-0.5 text-zinc-500">Qty {item.quantity}</p>
+                            <p className="mt-0.5 text-zinc-500">
+                              Qty {item.quantity}
+                              {item.fulfillmentType === "PRE_ORDER" ? " · Pre-order" : ""}
+                            </p>
+                            {item.fulfillmentType === "PRE_ORDER" &&
+                            (item.expectedShipNote || item.expectedShipAt) ? (
+                              <p className="mt-1 text-xs text-amber-200/90">
+                                Est. ship:{" "}
+                                {item.expectedShipNote ||
+                                  new Date(item.expectedShipAt).toLocaleDateString("en-PK", {
+                                    dateStyle: "medium",
+                                  })}
+                              </p>
+                            ) : null}
                           </div>
                           <div className="shrink-0 text-right">
                             <p className="text-zinc-400">{formatPrice(item.price)} each</p>
@@ -85,6 +113,18 @@ export default function OrderCompleteSuccess({ order }) {
                         </li>
                       ))}
                     </ul>
+                  </div>
+                ) : null}
+
+                {showPreOrderTrack && order.status ? (
+                  <div className="mt-6 border-t border-white/[0.08] pt-5">
+                    <OrderTrackingTimeline
+                      status={order.status}
+                      fulfillmentKind={order.fulfillmentKind ?? "pre_order"}
+                      variant="dark"
+                      compact
+                      showHeading={false}
+                    />
                   </div>
                 ) : null}
               </div>

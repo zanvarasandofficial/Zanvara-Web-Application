@@ -1,10 +1,13 @@
 import { Suspense } from "react";
 import OrderSuccessView from "../../../components/checkout/OrderSuccessView";
+import { buildPageMetadata } from "../../../lib/seo/metadata";
 
-export const metadata = {
-  title: "Order Confirmed | Zanvara",
-  description: "Your Zanvara order has been placed successfully.",
-};
+export const metadata = buildPageMetadata({
+  title: "Order confirmed",
+  description: "Your Zanvara order was placed successfully.",
+  path: "/checkout/success",
+  noIndex: true,
+});
 
 export default function CheckoutSuccessPage() {
   return (

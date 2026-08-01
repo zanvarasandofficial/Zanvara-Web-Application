@@ -1,4 +1,5 @@
 import ContactForm from "../../components/contact/ContactForm";
+import JsonLd from "../../components/seo/JsonLd";
 import Reveal from "../../components/ui/Reveal";
 import { gradientTextClass } from "../../lib/ui/theme";
 import {
@@ -7,11 +8,16 @@ import {
   EMAIL_URL,
   WHATSAPP_URL,
 } from "../../lib/data/contact";
+import { buildBreadcrumbSchema } from "../../lib/seo/json-ld";
+import { buildPageMetadata } from "../../lib/seo/metadata";
 
-export const metadata = {
-  title: "Contact Us | Zanvara",
-  description: "Get in touch with the Zanvara team via form, WhatsApp, or email.",
-};
+export const metadata = buildPageMetadata({
+  title: "Contact us",
+  description:
+    "Contact Zanvara for orders, pre-orders, and product questions. WhatsApp, email, and contact form support for customers in Pakistan and abroad.",
+  path: "/contact",
+  keywords: ["contact Zanvara", "Zanvara WhatsApp", "sand table support"],
+});
 
 const contactChannels = [
   {
@@ -47,7 +53,14 @@ const contactChannels = [
 ];
 
 export default function ContactPage() {
+  const breadcrumb = buildBreadcrumbSchema([
+    { name: "Home", path: "/" },
+    { name: "Contact", path: "/contact" },
+  ]);
+
   return (
+    <>
+      {breadcrumb ? <JsonLd data={breadcrumb} /> : null}
     <div className="relative overflow-hidden pb-16 pt-10 sm:pt-12 lg:pt-14">
       <div
         aria-hidden="true"
@@ -154,5 +167,6 @@ export default function ContactPage() {
         </Reveal>
       </div>
     </div>
+    </>
   );
 }

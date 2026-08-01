@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 function buildGalleryImages(src, hoverImage, galleryImages = []) {
   const images = [];
@@ -22,6 +22,8 @@ function buildGalleryImages(src, hoverImage, galleryImages = []) {
 
 export default function ProductImageZoom({ src, alt, hoverImage, galleryImages = [] }) {
   const containerRef = useRef(null);
+  const thumbStripRef = useRef(null);
+  const touchStartX = useRef(0);
   const images = useMemo(
     () => buildGalleryImages(src, hoverImage, galleryImages),
     [src, hoverImage, galleryImages],
@@ -31,6 +33,18 @@ export default function ProductImageZoom({ src, alt, hoverImage, galleryImages =
   const [position, setPosition] = useState({ x: 50, y: 50 });
 
   const activeImage = images[selectedIndex] ?? src;
+
+  useEffect(() => {
+    const strip = thumbStripRef.current;
+    if (!strip) return;
+
+    const activeThumb = strip.querySelector('[data-active-thumb="true"]');
+    activeThumb?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "center",
+    });
+  }, [selectedIndex]);
 
   function handleMove(event) {
     const bounds = containerRef.current?.getBoundingClientRect();
@@ -53,17 +67,54 @@ export default function ProductImageZoom({ src, alt, hoverImage, galleryImages =
     setIsZooming(false);
   }
 
+  function goToImage(index) {
+    if (index < 0 || index >= images.length) return;
+    handleSelect(index);
+  }
+
+  function handleTouchStart(event) {
+    touchStartX.current = event.touches[0]?.clientX ?? 0;
+  }
+
+  function handleTouchEnd(event) {
+    if (images.length <= 1) return;
+
+    const endX = event.changedTouches[0]?.clientX ?? 0;
+    const delta = endX - touchStartX.current;
+
+    if (Math.abs(delta) < 48) return;
+
+    if (delta < 0) {
+      goToImage(Math.min(images.length - 1, selectedIndex + 1));
+      return;
+    }
+
+    goToImage(Math.max(0, selectedIndex - 1));
+  }
+
+  function handleMouseEnter() {
+    if (typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches) {
+      setIsZooming(true);
+    }
+  }
+
+  function handleMouseLeave() {
+    setIsZooming(false);
+  }
+
   return (
-    <div className="w-full">
+    <div className="w-full min-w-0 max-w-full overflow-hidden">
       <div
         ref={containerRef}
-        className="relative mx-auto aspect-square w-full overflow-hidden rounded-[1.75rem] border border-white/[0.08] bg-zinc-950 shadow-[0_20px_50px_rgba(0,0,0,0.3)] lg:mx-0"
-        onMouseEnter={() => setIsZooming(true)}
-        onMouseLeave={() => setIsZooming(false)}
+        className="relative mx-auto aspect-square w-full max-w-full overflow-hidden rounded-[1.75rem] border border-white/[0.08] bg-zinc-950 shadow-[0_20px_50px_rgba(0,0,0,0.3)] lg:mx-0"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         onMouseMove={handleMove}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
       >
         <div
-          className="absolute inset-0 transition-transform duration-300 ease-out"
+          className="absolute inset-0 overflow-hidden transition-transform duration-300 ease-out"
           style={{
             transform: isZooming ? "scale(1.85)" : "scale(1)",
             transformOrigin: `${position.x}% ${position.y}%`,
@@ -78,16 +129,13 @@ export default function ProductImageZoom({ src, alt, hoverImage, galleryImages =
             className="object-cover"
           />
         </div>
-
-        {/* <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/35 to-transparent px-4 py-3">
-          <p className="text-xs text-zinc-300">
-            {isZooming ? "Move cursor to explore details" : "Hover to zoom in place"}
-          </p>
-        </div> */}
       </div>
 
       {images.length > 1 ? (
-        <div className="mx-auto mt-4 flex w-full gap-3 overflow-x-auto pb-3 lg:mx-0 Custom__scrollbar">
+        <div
+          ref={thumbStripRef}
+          className="Custom__scrollbar mt-4 flex w-full max-w-full min-w-0 snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain scroll-smooth pb-2 [-webkit-overflow-scrolling:touch] lg:mx-0"
+        >
           {images.map((image, index) => {
             const isActive = index === selectedIndex;
 
@@ -95,11 +143,12 @@ export default function ProductImageZoom({ src, alt, hoverImage, galleryImages =
               <button
                 key={`${image}-${index}`}
                 type="button"
+                data-active-thumb={isActive ? "true" : "false"}
                 onClick={() => handleSelect(index)}
                 aria-label={`View product image ${index + 1}`}
                 aria-pressed={isActive}
                 className={[
-                  "relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border transition-all duration-200",
+                  "relative h-[4.25rem] w-[4.25rem] shrink-0 snap-center overflow-hidden rounded-xl border transition-all duration-200 sm:h-16 sm:w-16",
                   isActive
                     ? "border-[#FFB347] ring-2 ring-[#FFB347]/40"
                     : "border-white/10 opacity-75 hover:border-[#FFB347]/35 hover:opacity-100",

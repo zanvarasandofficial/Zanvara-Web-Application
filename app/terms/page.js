@@ -1,10 +1,14 @@
 import LegalPageLayout from "../../components/legal/LegalPageLayout";
 import { CONTACT_EMAIL } from "../../lib/data/contact";
+import { buildPageMetadata } from "../../lib/seo/metadata";
 
-export const metadata = {
-  title: "Terms & Conditions | Zanvara",
-  description: "Terms and conditions for shopping on Zanvara — orders, delivery, returns, and payments.",
-};
+export const metadata = buildPageMetadata({
+  title: "Terms & conditions",
+  description:
+    "Zanvara terms and conditions for online orders, cash on delivery, pre-orders, delivery across Pakistan, returns, and product warranties.",
+  path: "/terms",
+  keywords: ["Zanvara terms", "COD terms Pakistan", "pre-order policy"],
+});
 
 const sections = [
   {
