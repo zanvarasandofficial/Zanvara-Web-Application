@@ -1,7 +1,8 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import ProductDetail from "../../../components/products/ProductDetail";
 import JsonLd from "../../../components/seo/JsonLd";
 import { fetchProductById } from "../../../lib/api/products";
+import { getProductPath } from "../../../lib/products/paths";
 import { buildBreadcrumbSchema, buildProductSchema } from "../../../lib/seo/json-ld";
 import { buildProductMetadata } from "../../../lib/seo/metadata";
 
@@ -21,12 +22,17 @@ export default async function ProductPage({ params }) {
     notFound();
   }
 
+  const canonicalPath = getProductPath(product);
+  if (canonicalPath !== `/products/${id}`) {
+    redirect(canonicalPath);
+  }
+
   const structuredData = [
     buildProductSchema(product),
     buildBreadcrumbSchema([
       { name: "Home", path: "/" },
       { name: "Products", path: "/products" },
-      { name: product.name, path: `/products/${product.id}` },
+      { name: product.name, path: canonicalPath },
     ]),
   ];
 

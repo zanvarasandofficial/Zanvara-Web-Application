@@ -17,6 +17,7 @@ import {
   getPreOrderSlotsRemaining,
   isPreOrderActive,
 } from "../../lib/products/fulfillment";
+import { getProductPath } from "../../lib/products/paths";
 import {
   PRE_ORDER_BUTTON,
   PRE_ORDER_FULL,
@@ -40,7 +41,7 @@ export default function ProductCard({ product }) {
         )
       : null);
   const hoverImage = product.hoverImage || product.image;
-  const productHref = `/products/${product.id}`;
+  const productHref = getProductPath(product);
   const badgeLabel = product.badge?.trim();
   const comingSoonBlocked = isComingSoonPurchaseBlocked(product);
   const showCountdown = isComingSoonCountdownActive(product);

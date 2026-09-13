@@ -14,6 +14,11 @@ import {
   adminSecondaryButtonClassName,
   adminSelectClassName,
 } from "../../lib/ui/adminStyles";
+import {
+  buildDeliveryOptionsPayload,
+  DEFAULT_ADMIN_DELIVERY_OPTIONS,
+  mapAdminDeliveryOptionsFromProduct,
+} from "../../lib/products/delivery-options";
 import RichTextEditor from "./RichTextEditor";
 
 const emptyForm = {
@@ -32,8 +37,7 @@ const emptyForm = {
   badge: "",
   status: "PUBLISHED",
   isPopular: false,
-  deliveryType: "FREE",
-  deliveryCharge: "",
+  deliveryOptions: DEFAULT_ADMIN_DELIVERY_OPTIONS.map((option) => ({ ...option })),
   isComingSoon: false,
   comingSoonMode: "days",
   comingSoonDays: "7",
@@ -161,11 +165,7 @@ function mapInitialValues(product) {
     badge: product.badge ?? "",
     status: product.status ?? "PUBLISHED",
     isPopular: Boolean(product.isPopular),
-    deliveryType: product.deliveryType ?? "FREE",
-    deliveryCharge:
-      product.deliveryType === "CHARGED" && product.deliveryCharge != null
-        ? product.deliveryCharge.toString()
-        : "",
+    deliveryOptions: mapAdminDeliveryOptionsFromProduct(product),
     isComingSoon: Boolean(product.isComingSoon),
     comingSoonMode: product.availableAt ? "datetime" : "days",
     comingSoonDays: "7",
@@ -408,15 +408,7 @@ export default function ProductForm({
         throw new Error("USD sale price must be lower than original USD price.");
       }
 
-      const deliveryType = form.deliveryType;
-      const deliveryCharge =
-        deliveryType === "CHARGED" && form.deliveryCharge
-          ? Number(form.deliveryCharge)
-          : null;
-
-      if (deliveryType === "CHARGED" && (!deliveryCharge || deliveryCharge <= 0)) {
-        throw new Error("Enter a valid delivery charge or choose free delivery.");
-      }
+      const deliveryOptions = buildDeliveryOptionsPayload(form.deliveryOptions);
 
       let nextMainImageUrl = mainImageUrl;
       let nextHoverImageUrl = hoverImageUrl;
@@ -472,8 +464,7 @@ export default function ProductForm({
         stock: Number(form.stock || 0),
         status: form.status,
         isPopular: form.isPopular,
-        deliveryType,
-        deliveryCharge,
+        deliveryOptions,
         ...buildFulfillmentPayload(form),
       };
 
@@ -683,32 +674,215 @@ export default function ProductForm({
                 />
               </label>
 
-              <label className="flex flex-col gap-2">
-                <span className={adminLabelClassName}>Delivery</span>
-                <select
-                  value={form.deliveryType}
-                  onChange={(event) => updateField("deliveryType", event.target.value)}
-                  className={adminSelectClassName}
-                >
-                  <option value="FREE">Free delivery</option>
-                  <option value="CHARGED">Delivery charges apply</option>
-                </select>
-              </label>
+              <div className="sm:col-span-2 rounded-xl border border-slate-200 bg-slate-50/80 p-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className={adminLabelClassName}>Delivery options</p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      Set Standard, Express, or custom delivery tiers with price and ETA per product.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      updateField("deliveryOptions", [
+                        ...form.deliveryOptions,
+                        {
+                          id: `option-${form.deliveryOptions.length + 1}`,
+                          label: "Custom Delivery",
+                          charge: "0",
+                          chargeUsd: "",
+                          minDays: "3",
+                          maxDays: "5",
+                          isDefault: false,
+                          enabled: true,
+                          onlinePaymentMode: "none",
+                          onlinePaymentPercent: "",
+                        },
+                      ])
+                    }
+                    className={adminSecondaryButtonClassName}
+                  >
+                    Add option
+                  </button>
+                </div>
 
-              {form.deliveryType === "CHARGED" ? (
-                <label className="flex flex-col gap-2 sm:col-span-2">
-                  <span className={adminLabelClassName}>Delivery charge (PKR)</span>
-                  <input
-                    type="number"
-                    min="1"
-                    required
-                    value={form.deliveryCharge}
-                    onChange={(event) => updateField("deliveryCharge", event.target.value)}
-                    placeholder="250"
-                    className={adminInputClassName}
-                  />
-                </label>
-              ) : null}
+                <div className="mt-4 space-y-4">
+                  {form.deliveryOptions.map((option, index) => (
+                    <div
+                      key={`${option.id}-${index}`}
+                      className="rounded-xl border border-slate-200 bg-white p-4"
+                    >
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <label className="flex flex-col gap-2 sm:col-span-2">
+                          <span className={adminLabelClassName}>Label</span>
+                          <input
+                            type="text"
+                            value={option.label}
+                            onChange={(event) => {
+                              const next = [...form.deliveryOptions];
+                              next[index] = { ...next[index], label: event.target.value };
+                              updateField("deliveryOptions", next);
+                            }}
+                            placeholder="Standard Delivery"
+                            className={adminInputClassName}
+                          />
+                        </label>
+
+                        <label className="flex flex-col gap-2">
+                          <span className={adminLabelClassName}>Price (PKR)</span>
+                          <input
+                            type="number"
+                            min="0"
+                            value={option.charge}
+                            onChange={(event) => {
+                              const next = [...form.deliveryOptions];
+                              next[index] = { ...next[index], charge: event.target.value };
+                              updateField("deliveryOptions", next);
+                            }}
+                            className={adminInputClassName}
+                          />
+                        </label>
+
+                        <label className="flex flex-col gap-2">
+                          <span className={adminLabelClassName}>Price (USD, optional)</span>
+                          <input
+                            type="number"
+                            min="0"
+                            value={option.chargeUsd}
+                            onChange={(event) => {
+                              const next = [...form.deliveryOptions];
+                              next[index] = { ...next[index], chargeUsd: event.target.value };
+                              updateField("deliveryOptions", next);
+                            }}
+                            className={adminInputClassName}
+                          />
+                        </label>
+
+                        <label className="flex flex-col gap-2">
+                          <span className={adminLabelClassName}>Min days</span>
+                          <input
+                            type="number"
+                            min="0"
+                            value={option.minDays}
+                            onChange={(event) => {
+                              const next = [...form.deliveryOptions];
+                              next[index] = { ...next[index], minDays: event.target.value };
+                              updateField("deliveryOptions", next);
+                            }}
+                            className={adminInputClassName}
+                          />
+                        </label>
+
+                        <label className="flex flex-col gap-2">
+                          <span className={adminLabelClassName}>Max days</span>
+                          <input
+                            type="number"
+                            min="0"
+                            value={option.maxDays}
+                            onChange={(event) => {
+                              const next = [...form.deliveryOptions];
+                              next[index] = { ...next[index], maxDays: event.target.value };
+                              updateField("deliveryOptions", next);
+                            }}
+                            className={adminInputClassName}
+                          />
+                        </label>
+
+                        <label className="flex flex-col gap-2 sm:col-span-2">
+                          <span className={adminLabelClassName}>Online payment rule</span>
+                          <select
+                            value={option.onlinePaymentMode ?? "none"}
+                            onChange={(event) => {
+                              const next = [...form.deliveryOptions];
+                              next[index] = {
+                                ...next[index],
+                                onlinePaymentMode: event.target.value,
+                              };
+                              updateField("deliveryOptions", next);
+                            }}
+                            className={adminSelectClassName}
+                          >
+                            <option value="none">None — COD allowed (Standard)</option>
+                            <option value="full">100% online before delivery</option>
+                            <option value="partial">Custom % online advance</option>
+                          </select>
+                        </label>
+
+                        {option.onlinePaymentMode === "partial" ? (
+                          <label className="flex flex-col gap-2">
+                            <span className={adminLabelClassName}>Online advance (%)</span>
+                            <input
+                              type="number"
+                              min="1"
+                              max="99"
+                              value={option.onlinePaymentPercent ?? ""}
+                              onChange={(event) => {
+                                const next = [...form.deliveryOptions];
+                                next[index] = {
+                                  ...next[index],
+                                  onlinePaymentPercent: event.target.value,
+                                };
+                                updateField("deliveryOptions", next);
+                              }}
+                              placeholder="20"
+                              className={adminInputClassName}
+                            />
+                          </label>
+                        ) : null}
+                      </div>
+
+                      <div className="mt-4 flex flex-wrap items-center gap-4">
+                        <label className="flex items-center gap-2 text-sm text-slate-700">
+                          <input
+                            type="radio"
+                            name="defaultDeliveryOption"
+                            checked={Boolean(option.isDefault)}
+                            onChange={() => {
+                              updateField(
+                                "deliveryOptions",
+                                form.deliveryOptions.map((entry, entryIndex) => ({
+                                  ...entry,
+                                  isDefault: entryIndex === index,
+                                })),
+                              );
+                            }}
+                          />
+                          Default option
+                        </label>
+
+                        <label className="flex items-center gap-2 text-sm text-slate-700">
+                          <input
+                            type="checkbox"
+                            checked={Boolean(option.enabled)}
+                            onChange={(event) => {
+                              const next = [...form.deliveryOptions];
+                              next[index] = { ...next[index], enabled: event.target.checked };
+                              updateField("deliveryOptions", next);
+                            }}
+                          />
+                          Enabled
+                        </label>
+
+                        {form.deliveryOptions.length > 1 ? (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              updateField(
+                                "deliveryOptions",
+                                form.deliveryOptions.filter((_, entryIndex) => entryIndex !== index),
+                              )
+                            }
+                            className="text-sm font-medium text-red-600 hover:text-red-700"
+                          >
+                            Remove
+                          </button>
+                        ) : null}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
 
               <div className="sm:col-span-2 rounded-xl border border-violet-200 bg-violet-50/60 p-4">
                 <label className="flex items-center justify-between gap-4">

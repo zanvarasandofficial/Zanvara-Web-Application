@@ -1,4 +1,5 @@
 import { fetchAllProducts } from "../lib/api/products";
+import { getProductPath } from "../lib/products/paths";
 import { absoluteUrl, getSiteUrl } from "../lib/seo/site";
 
 export default async function sitemap() {
@@ -32,7 +33,7 @@ export default async function sitemap() {
     }
 
     entries.push({
-      url: absoluteUrl(`/products/${product.id}`),
+      url: absoluteUrl(getProductPath(product)),
       lastModified: now,
       changeFrequency: "weekly",
       priority: 0.8,

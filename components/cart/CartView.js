@@ -7,7 +7,6 @@ import { useToast } from "../../context/ToastContext";
 import { USD_FOOTER_NOTE } from "../../lib/content/international-pricing";
 import { useCurrency } from "../../context/CurrencyContext";
 import { formatPrice } from "../../lib/data/products";
-import { formatDeliveryLabel } from "../../lib/products/delivery";
 import {
   formatExpectedShipFromLine,
   isCartLinePreOrder,
@@ -22,16 +21,15 @@ import {
   PRE_ORDER_MIXED_CART,
   PRE_ORDER_SLOTS_LEFT,
 } from "../../lib/content/pre-order";
+import { resolveCatalogProduct } from "../../lib/products/live-catalog";
+import { getProductPath } from "../../lib/products/paths";
 import Reveal from "../ui/Reveal";
 
 export default function CartView() {
   const {
     items,
     subtotal,
-    deliveryTotal,
-    deliveryNote,
     fulfillmentKind,
-    total,
     updateQuantity,
     removeItem,
   } = useCart();
@@ -78,16 +76,19 @@ export default function CartView() {
         <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
           <div className="space-y-4">
             {items.map((item, index) => {
-              const itemDeliveryLabel = formatDeliveryLabel(item);
-              const itemDeliveryIsFree = itemDeliveryLabel === "Free";
+              const catalogProduct = resolveCatalogProduct({
+                productId: item.productId,
+                cartItem: item,
+              });
               const isPreOrderLine = isCartLinePreOrder(item);
               const expectedShip = isPreOrderLine ? formatExpectedShipFromLine(item) : null;
+              const productHref = getProductPath(catalogProduct);
 
               return (
               <Reveal key={item.productId} delay={index * 40}>
                 <article className="grid gap-4 rounded-[1.75rem] border border-white/[0.08] bg-white/[0.03] p-4 shadow-[0_20px_50px_rgba(0,0,0,0.25)] sm:grid-cols-[120px_minmax(0,1fr)] sm:p-5">
                   <Link
-                    href={`/products/${item.productId}`}
+                    href={productHref}
                     className="relative aspect-square overflow-hidden rounded-2xl bg-zinc-900"
                   >
                     <Image
@@ -103,7 +104,7 @@ export default function CartView() {
                     <div className="flex items-start justify-between gap-4">
                       <div>
                         <Link
-                          href={`/products/${item.productId}`}
+                          href={productHref}
                           className="text-lg font-semibold text-white transition-colors hover:text-[#FFD9A6]"
                         >
                           {item.name}
@@ -118,18 +119,11 @@ export default function CartView() {
                             Est. ship: {expectedShip}
                           </p>
                         ) : null}
-                        <p
-                          className={[
-                            "mt-2 inline-flex rounded-full px-2.5 py-1 text-xs font-medium",
-                            isPreOrderLine
-                              ? "border border-amber-500/25 bg-amber-500/10 text-amber-200"
-                              : itemDeliveryIsFree
-                                ? "border border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
-                                : "border border-amber-500/20 bg-amber-500/10 text-amber-200",
-                          ].join(" ")}
-                        >
-                          {isPreOrderLine ? PRE_ORDER_CART_CHIP : `Delivery: ${itemDeliveryLabel}`}
-                        </p>
+                        {isPreOrderLine ? (
+                          <p className="mt-2 inline-flex rounded-full border border-amber-500/25 bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-200">
+                            {PRE_ORDER_CART_CHIP}
+                          </p>
+                        ) : null}
                       </div>
                       <button
                         type="button"
@@ -214,20 +208,14 @@ export default function CartView() {
                   <span>Subtotal</span>
                   <span className="text-white">{formatPrice(subtotal)}</span>
                 </div>
-                <div className="flex items-center justify-between text-zinc-400">
-                  <span>Delivery</span>
-                  <span className={deliveryTotal > 0 ? "text-amber-200" : "text-emerald-300"}>
-                    {deliveryTotal > 0 ? formatPrice(deliveryTotal) : "Free"}
-                  </span>
-                </div>
-                {deliveryNote ? (
-                  <p className="text-xs leading-5 text-zinc-500">{deliveryNote}</p>
-                ) : null}
+                <p className="text-xs leading-5 text-zinc-500">
+                  Delivery speed and charges are selected at checkout.
+                </p>
                 <div className="border-t border-white/[0.06] pt-3">
                   <div className="flex items-center justify-between">
                     <span className="font-medium text-white">Total</span>
                     <span className="text-2xl font-bold text-white">
-                      {formatPrice(total)}
+                      {formatPrice(subtotal)}
                     </span>
                   </div>
                   <p className="mt-2 text-xs text-zinc-500">

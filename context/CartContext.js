@@ -9,8 +9,13 @@ import {
   useRef,
   useState,
 } from "react";
-import { fetchProductById } from "../lib/api/products";
+import { fetchAllProducts, fetchProductById } from "../lib/api/products";
 import { getCartDeliverySummary } from "../lib/products/delivery";
+import {
+  formatDeliveryOptionEta,
+  getDefaultDeliveryOption,
+  resolveSelectedDeliveryOption,
+} from "../lib/products/delivery-options";
 import { isComingSoonPurchaseBlocked } from "../lib/products/availability";
 import {
   getCartFulfillmentKind,
@@ -20,6 +25,7 @@ import {
 import {
   getLiveProductById,
   registerCatalogProduct,
+  registerCatalogProducts,
   resolveCatalogProduct,
 } from "../lib/products/live-catalog";
 import { useStorePolicy } from "./StorePolicyContext";
@@ -39,6 +45,10 @@ function normalizeItem(item) {
     quantity: item.quantity,
     deliveryType: item.deliveryType ?? "FREE",
     deliveryCharge: item.deliveryCharge ?? null,
+    deliveryOptionId: item.deliveryOptionId ?? null,
+    deliveryLabel: item.deliveryLabel ?? null,
+    deliveryEta: item.deliveryEta ?? null,
+    onlinePaymentPercent: item.onlinePaymentPercent ?? 0,
     isPreOrder: Boolean(item.isPreOrder),
     fulfillmentType: item.fulfillmentType ?? (item.isPreOrder ? "PRE_ORDER" : "STANDARD"),
     expectedShipAt: item.expectedShipAt ?? null,
@@ -46,9 +56,14 @@ function normalizeItem(item) {
   };
 }
 
-function buildCartLineFromProduct(catalogProduct, quantity) {
+function buildCartLineFromProduct(catalogProduct, quantity, deliveryOptionId) {
   const preOrder = isPreOrderActive(catalogProduct);
   const maxQty = getPurchasableQuantity(catalogProduct);
+  const selectedOption = resolveSelectedDeliveryOption(
+    catalogProduct,
+    deliveryOptionId,
+  );
+  const deliveryCharge = selectedOption?.charge ?? 0;
 
   return {
     productId: catalogProduct.id,
@@ -58,8 +73,12 @@ function buildCartLineFromProduct(catalogProduct, quantity) {
     image: catalogProduct.image,
     stock: maxQty,
     quantity,
-    deliveryType: catalogProduct.deliveryType ?? "FREE",
-    deliveryCharge: catalogProduct.deliveryCharge ?? null,
+    deliveryType: deliveryCharge > 0 ? "CHARGED" : "FREE",
+    deliveryCharge: deliveryCharge > 0 ? deliveryCharge : null,
+    deliveryOptionId: selectedOption?.id ?? null,
+    deliveryLabel: selectedOption?.label ?? null,
+    deliveryEta: selectedOption ? formatDeliveryOptionEta(selectedOption) : null,
+    onlinePaymentPercent: selectedOption?.onlinePaymentPercent ?? 0,
     isPreOrder: preOrder,
     fulfillmentType: preOrder ? "PRE_ORDER" : "STANDARD",
     expectedShipAt: catalogProduct.expectedShipAt ?? null,
@@ -89,7 +108,19 @@ function reconcileCartItems(current, { notifyRemoved } = {}) {
     }
 
     const qty = Math.min(item.quantity, maxQty);
-    next.push(normalizeItem(buildCartLineFromProduct(catalogProduct, qty)));
+    const selectedOption = resolveSelectedDeliveryOption(
+      catalogProduct,
+      item.deliveryOptionId,
+    );
+    next.push(
+      normalizeItem(
+        buildCartLineFromProduct(
+          catalogProduct,
+          qty,
+          selectedOption?.id ?? getDefaultDeliveryOption(catalogProduct)?.id,
+        ),
+      ),
+    );
   }
 
   if (removed > 0 && notifyRemoved) {
@@ -107,7 +138,9 @@ function reconcileCartItems(current, { notifyRemoved } = {}) {
         line.quantity !== prev.quantity ||
         line.isPreOrder !== prev.isPreOrder ||
         line.stock !== prev.stock ||
-        line.expectedShipAt !== prev.expectedShipAt
+        line.expectedShipAt !== prev.expectedShipAt ||
+        line.deliveryOptionId !== prev.deliveryOptionId ||
+        line.deliveryCharge !== prev.deliveryCharge
       );
     });
 
@@ -148,6 +181,7 @@ export function CartProvider({ children }) {
 
     async function syncCartWithCatalog() {
       const ids = [...new Set(items.map((item) => item.productId))];
+      let needsCatalogBootstrap = false;
 
       await Promise.all(
         ids.map(async (id) => {
@@ -157,9 +191,16 @@ export function CartProvider({ children }) {
           const product = await fetchProductById(id);
           if (product) {
             registerCatalogProduct(product);
+            return;
           }
+          needsCatalogBootstrap = true;
         }),
       );
+
+      if (needsCatalogBootstrap) {
+        const catalog = await fetchAllProducts();
+        registerCatalogProducts(catalog);
+      }
 
       if (cancelled) return;
 
@@ -211,7 +252,7 @@ export function CartProvider({ children }) {
   const total = useMemo(() => subtotal + deliveryTotal, [subtotal, deliveryTotal]);
   const fulfillmentKind = useMemo(() => getCartFulfillmentKind(items), [items]);
 
-  const addItem = useCallback((product, quantity = 1) => {
+  const addItem = useCallback((product, quantity = 1, deliveryOptionId) => {
     registerCatalogProduct(product);
     syncedProductIdsRef.current = "";
 
@@ -255,17 +296,31 @@ export function CartProvider({ children }) {
         return current;
       }
 
+      const resolvedOptionId =
+        deliveryOptionId ??
+        existing?.deliveryOptionId ??
+        getDefaultDeliveryOption(catalogProduct)?.id;
+
       if (existing) {
         return current.map((item) =>
           item.productId === catalogProduct.id
             ? normalizeItem({
-                ...buildCartLineFromProduct(catalogProduct, nextQty),
+                ...buildCartLineFromProduct(
+                  catalogProduct,
+                  nextQty,
+                  resolvedOptionId,
+                ),
               })
             : item,
         );
       }
 
-      return [...current, normalizeItem(buildCartLineFromProduct(catalogProduct, qty))];
+      return [
+        ...current,
+        normalizeItem(
+          buildCartLineFromProduct(catalogProduct, qty, resolvedOptionId),
+        ),
+      ];
     });
 
     return result;
@@ -306,11 +361,55 @@ export function CartProvider({ children }) {
       return current.map((entry) =>
         entry.productId === productId
           ? normalizeItem({
-              ...buildCartLineFromProduct(catalogProduct, nextQty),
+              ...buildCartLineFromProduct(
+                catalogProduct,
+                nextQty,
+                entry.deliveryOptionId,
+              ),
             })
           : entry,
       );
     });
+
+    return result;
+  }, []);
+
+  const updateDeliveryOption = useCallback((productId, deliveryOptionId) => {
+    syncedProductIdsRef.current = "";
+    let result = { ok: true, message: "" };
+
+    setItems((current) =>
+      current.map((entry) => {
+        if (entry.productId !== productId) {
+          return entry;
+        }
+
+        const catalogProduct = resolveCatalogProduct({
+          productId,
+          cartItem: entry,
+        });
+        const selectedOption = resolveSelectedDeliveryOption(
+          catalogProduct,
+          deliveryOptionId,
+        );
+
+        if (!selectedOption) {
+          result = {
+            ok: false,
+            message: "That delivery option is no longer available.",
+          };
+          return entry;
+        }
+
+        return normalizeItem(
+          buildCartLineFromProduct(
+            catalogProduct,
+            entry.quantity,
+            selectedOption.id,
+          ),
+        );
+      }),
+    );
 
     return result;
   }, []);
@@ -337,6 +436,7 @@ export function CartProvider({ children }) {
       isReady,
       addItem,
       updateQuantity,
+      updateDeliveryOption,
       removeItem,
       clearCart,
     }),
@@ -351,6 +451,7 @@ export function CartProvider({ children }) {
       isReady,
       addItem,
       updateQuantity,
+      updateDeliveryOption,
       removeItem,
       clearCart,
     ],

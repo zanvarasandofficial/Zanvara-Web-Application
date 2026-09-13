@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useCart } from "../../context/CartContext";
 import { useToast } from "../../context/ToastContext";
 import {
@@ -9,7 +9,10 @@ import {
   formatProductPrice,
   getProductDisplayDiscountPercent,
 } from "../../lib/money/product-price";
-import { formatDeliveryLabel, formatProductDeliveryTrustLine } from "../../lib/products/delivery";
+import {
+  formatDeliveryLabel,
+  formatProductDeliveryTrustLine,
+} from "../../lib/products/delivery";
 import {
   PRODUCT_TRUST_COD_LINE,
   PRODUCT_TRUST_PACKAGING,

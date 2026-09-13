@@ -5,6 +5,7 @@ import { formatPrice } from "../../lib/data/products";
 import { PAYMENT_ORDER_SUCCESS } from "../../lib/content/store-policy";
 import {
   isOnlinePaymentMethodName,
+  isPartialOnlinePaymentMethodName,
   PAYMENT_ORDER_SUCCESS_ONLINE,
 } from "../../lib/payments/checkout";
 import {
@@ -19,7 +20,9 @@ export default function OrderCompleteSuccess({ order }) {
     order && isPreOrderFulfillment(order.fulfillmentKind ?? "standard");
   const paymentMessage = isOnlinePaymentMethodName(order?.paymentMethod)
     ? PAYMENT_ORDER_SUCCESS_ONLINE
-    : PAYMENT_ORDER_SUCCESS;
+    : isPartialOnlinePaymentMethodName(order?.paymentMethod)
+      ? "Pay the online advance first — we will send payment instructions. The remaining balance is due on delivery."
+      : PAYMENT_ORDER_SUCCESS;
   return (
     <div className="pb-16 pt-8 sm:pt-10">
       <div className="mx-auto max-w-3xl px-4 sm:px-6">
@@ -69,6 +72,18 @@ export default function OrderCompleteSuccess({ order }) {
                   <div className="mt-3 flex items-center justify-between gap-4 text-sm">
                     <span className="text-zinc-500">Delivery</span>
                     <span className="text-white">{formatPrice(order.deliveryTotal)}</span>
+                  </div>
+                ) : null}
+                {order.onlinePaymentDue > 0 ? (
+                  <div className="mt-3 flex items-center justify-between gap-4 text-sm">
+                    <span className="text-zinc-500">Pay online now</span>
+                    <span className="text-sky-200">{formatPrice(order.onlinePaymentDue)}</span>
+                  </div>
+                ) : null}
+                {order.balanceOnDelivery > 0 && order.onlinePaymentDue > 0 ? (
+                  <div className="mt-3 flex items-center justify-between gap-4 text-sm">
+                    <span className="text-zinc-500">On delivery</span>
+                    <span className="text-white">{formatPrice(order.balanceOnDelivery)}</span>
                   </div>
                 ) : null}
                 <div className="mt-3 flex items-center justify-between gap-4 text-sm">
